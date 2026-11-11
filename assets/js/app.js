@@ -69,6 +69,11 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   }
 
   const onionSkin = createOnionSkin($("#cameraViewfinder"));
+  const animationPreview = document.createElement("img");
+  animationPreview.id = "animationPreviewFrame";
+  animationPreview.alt = "Selected stop-motion exposure";
+  animationPreview.hidden = true;
+  $("#cameraViewfinder").insertBefore(animationPreview, $(".viewfinder-meta"));
   const frameSequence = createFrameSequence(state.frames);
   const audioEngine = createAudioEngine($("#audioPreview"));
 
@@ -165,6 +170,13 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   }
 
   // ---------- Timeline model and rendering ----------
+  function setMonitorMode(mode) {
+    state.monitorMode = mode === "animation" ? "animation" : "live";
+    $("#cameraViewfinder").classList.toggle("show-animation-frame", state.monitorMode === "animation");
+    $("#liveViewModeBtn").classList.toggle("active", state.monitorMode === "live");
+    $("#animationViewModeBtn").classList.toggle("active", state.monitorMode === "animation");
+  }
+
   function setFrame(value) {
     // Animator-facing frame numbers are 1-based; array indices remain 0-based.
     const maxFrame = Math.max(120, state.frames.length);
@@ -175,6 +187,9 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     $("#currentFrameLabel").textContent = frameLabel(state.frame);
     $("#scrubberValue").textContent = String(state.frame).padStart(3, "0");
     $("#captureFrameReadout").textContent = "FRAME " + String(state.frame).padStart(3, "0");
+    const selected = state.frames[state.selectedFrameIndex];
+    if (selected?.src) { animationPreview.src = selected.src; animationPreview.hidden = false; }
+    else { animationPreview.removeAttribute("src"); animationPreview.hidden = true; }
     syncFrameSelection();
   }
 
@@ -189,6 +204,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   function togglePlayback(startAt = null, endAt = null) {
     if (state.playing) return stopPlayback();
     if (startAt !== null) setFrame(startAt);
+    setMonitorMode("animation");
     const finalFrame = endAt ?? Math.max(1, state.frames.length || 120);
     state.playing = true;
     $("#playTimeline").textContent = "Ⅱ";
@@ -393,6 +409,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     state.frames.push({ id: makeId("frame"), src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
     setFrame(state.frames.length);
     renderFrames();
+    setMonitorMode("live");
     notify("Frame " + String(state.frames.length).padStart(3, "0") + " captured.");
   }
 
@@ -414,6 +431,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     }
     if (state.frames.length) setFrame(state.frames.length);
     renderFrames();
+    if (state.frames.length) setMonitorMode("animation");
   }
 
   function toggleIntervalCapture() {
@@ -502,11 +520,14 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   $("#addTrackBtn").addEventListener("click", addTrack);
   $("#frameScrubber").addEventListener("input", event => {
     stopPlayback();
+    setMonitorMode("animation");
     setFrame(event.target.value);
   });
   $("#playTimeline").addEventListener("click", () => togglePlayback());
-  $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setFrame(Math.max(1, state.frame - 1)); });
-  $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
+  $("#liveViewModeBtn").addEventListener("click", () => setMonitorMode("live"));
+  $("#animationViewModeBtn").addEventListener("click", () => setMonitorMode("animation"));
+  $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.max(1, state.frame - 1)); });
+  $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
   $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame));
   $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#loopPlayback").addEventListener("change", event => { state.loopPlayback = event.target.checked; });
