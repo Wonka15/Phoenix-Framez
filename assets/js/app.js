@@ -607,6 +607,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
     state.frames.push({ id: makeId("frame"), projectId: state.activeProjectId, src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
+    frameSequence.replace(state.frames);
     setFrame(state.frames.length);
     renderFrames();
     setMonitorMode("live");
@@ -629,6 +630,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
         console.warn("[PhoenixFrame] Skipped an unreadable image:", error);
       }
     }
+    frameSequence.replace(state.frames);
     if (state.frames.length) setFrame(state.frames.length);
     renderFrames();
     if (state.frames.length) setMonitorMode("animation");
@@ -669,7 +671,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       ctx.fillStyle="#ffd27e";ctx.beginPath();ctx.moveTo(x+27,y);ctx.lineTo(x+48,y+7);ctx.lineTo(x+27,y+12);ctx.fill();
       return {id:makeId("demo-frame"),projectId:project.id,src:canvas.toDataURL("image/jpeg",.88),createdAt:new Date().toISOString(),source:"PhoenixFramez demo"};
     });
-    state.projects.unshift(project);state.activeProjectId=project.id;state.frames=frames;state.cues=[{id:makeId("cue"),frame:1,shape:"MBP",note:"Hello!"},{id:makeId("cue"),frame:3,shape:"A / I",note:"Ah!"},{id:makeId("cue"),frame:5,shape:"Rest",note:""}];
+    state.projects.unshift(project);state.activeProjectId=project.id;state.frames=frames;frameSequence.replace(state.frames);state.cues=[{id:makeId("cue"),frame:1,shape:"MBP",note:"Hello!"},{id:makeId("cue"),frame:3,shape:"A / I",note:"Ah!"},{id:makeId("cue"),frame:5,shape:"Rest",note:""}];
     state.selectedFrameIndex=0;state.playbackFps=12;$("#playbackFps").value="12";$("#captureFps").value="12 FPS";$("#cameraFpsReadout").textContent="12 FPS";$("#timelineFpsLabel").textContent="12 FPS";
     storage.write(STORAGE_KEYS.projects,state.projects);storage.write(STORAGE_KEYS.cues,state.cues);renderProjects();renderCues();renderFrames();setFrame(1);renderTimeline();showView("camera");notify("Demo loaded — press Play to preview the six-frame animation.");
   }
@@ -882,7 +884,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     try {
       const archive = validateProjectArchive(JSON.parse(await file.text()));
       if (!window.confirm("Import this archive and replace the current PhoenixFrame browser workspace?")) return;
-      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames; state.animationEdits = archive.animationEdits || {}; state.selectedFrameIndex = state.frames.length ? state.frames.length - 1 : -1;
+      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames; frameSequence.replace(state.frames); state.animationEdits = archive.animationEdits || {}; state.selectedFrameIndex = state.frames.length ? state.frames.length - 1 : -1;
       const timeline = normalizeTimeline(archive.timeline);
       state.markers = timeline.markers; state.tracks = timeline.tracks;
       storage.write(STORAGE_KEYS.projects, state.projects); storage.write(STORAGE_KEYS.cues, state.cues);
