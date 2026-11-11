@@ -232,6 +232,7 @@
     // Pointer events support both mouse and touch; clips remain within their lane.
     $$(".clip", host).forEach(clip => {
       clip.addEventListener("pointerdown", event => {
+        event.stopPropagation(); // Keep clip drags separate from whole-track reordering.
         if (event.button !== 0) return;
         const lane = clip.closest(".track-lane");
         const bounds = lane.getBoundingClientRect();
@@ -445,7 +446,7 @@
   $("#dockCreate").addEventListener("click", openProjectDialog);
   $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
 
-  ["#newProjectBtn", "#addProjectLink", "#browserNewProject", "#browserEmptyCreate"].forEach(selector => {
+  ["#newProjectBtn", "#addProjectLink", "#browserNewProject"].forEach(selector => {
     $(selector)?.addEventListener("click", openProjectDialog);
   });
 
