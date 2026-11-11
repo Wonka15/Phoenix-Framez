@@ -828,7 +828,49 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     } catch (error) { console.warn("[PhoenixFrame] Archive import failed:", error); notify(error.message || "Could not import this project archive."); }
     finally { event.target.value = ""; }
   });
-  $("#cameraConnectBtn").addEventListener("click", () => state.cameraStream ? disconnectCamera() : connectCamera());
+  // Camera power rocker supports both a deliberate swipe and a simple tap.
+  // Pointer capture keeps the gesture working when a finger moves beyond the switch.
+  const cameraPowerControl = $("#cameraConnectBtn");
+  let cameraSwitchPointerStart = null;
+  let ignoreCameraSwitchClick = false;
+  cameraPowerControl.addEventListener("pointerdown", event => {
+    if (event.button !== 0 || cameraPowerControl.disabled) return;
+    cameraSwitchPointerStart = { x: event.clientX, y: event.clientY, left: state.cameraStream ? 62 : 4 };
+    cameraPowerControl.classList.add("is-dragging");
+    cameraPowerControl.setPointerCapture?.(event.pointerId);
+  });
+  cameraPowerControl.addEventListener("pointermove", event => {
+    if (!cameraSwitchPointerStart) return;
+    const delta = event.clientX - cameraSwitchPointerStart.x;
+    const left = Math.max(4, Math.min(62, cameraSwitchPointerStart.left + delta));
+    const knob = cameraPowerControl.querySelector(".power-switch-knob");
+    if (knob) knob.style.left = left + "px";
+  });
+  cameraPowerControl.addEventListener("pointerup", event => {
+    if (!cameraSwitchPointerStart) return;
+    const delta = event.clientX - cameraSwitchPointerStart.x;
+    const moved = Math.abs(delta) >= 18;
+    cameraSwitchPointerStart = null;
+    cameraPowerControl.classList.remove("is-dragging");
+    const knob = cameraPowerControl.querySelector(".power-switch-knob");
+    if (knob) knob.style.left = "";
+    if (!moved) return; // A normal tap is handled by the click listener below.
+    ignoreCameraSwitchClick = true;
+    window.setTimeout(() => { ignoreCameraSwitchClick = false; }, 0);
+    const wantsOn = delta > 0;
+    if (wantsOn && !state.cameraStream) connectCamera();
+    else if (!wantsOn && state.cameraStream) disconnectCamera();
+  });
+  cameraPowerControl.addEventListener("pointercancel", () => {
+    cameraSwitchPointerStart = null;
+    cameraPowerControl.classList.remove("is-dragging");
+    const knob = cameraPowerControl.querySelector(".power-switch-knob");
+    if (knob) knob.style.left = "";
+  });
+  cameraPowerControl.addEventListener("click", () => {
+    if (ignoreCameraSwitchClick) return;
+    state.cameraStream ? disconnectCamera() : connectCamera();
+  });
   $("#shutterBtn").addEventListener("click", captureFrame);
   $("#cameraImportBtn").addEventListener("click", () => $("#cameraFileInput").click());
   $("#cameraFileInput").addEventListener("change", event => {
