@@ -69,3 +69,7 @@
   #cameraView .camera-privacy-note{padding:12px}
   #cameraView .frame-library{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* When reviewing an already captured exposure with the camera off, keep the still unobstructed. */
+#cameraView .camera-viewfinder.show-animation-frame .viewfinder-center{display:none}
+#cameraView #animationPreviewFrame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
