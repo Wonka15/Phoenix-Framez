@@ -44,6 +44,12 @@ PhoenixFrame should coordinate third-party desktop applications through optional
 
 Blender is the first target. Initial compatibility targets are Blender 5.3 stable and Blender 5.2 LTS. Start with read-only version, scene and timeline discovery, then add explicitly confirmed operations such as marker exchange, image-sequence import and preview rendering. Evaluate Blender 5.3's initial OpenTimelineIO support for limited timeline interchange, without assuming it represents all Blender project data. See [Master Application Controller](MASTER-APPLICATION-CONTROLLER.md).
 
+## Bidirectional live synchronization
+
+For supported properties, integration must work in both directions. PhoenixFrame scrubbing updates Blender's playhead, and Blender scrubbing/playback updates PhoenixFrame. Initial synchronized properties are current frame, mapped active scene, frame rate/range and timeline markers. Use a persistent local WebSocket connection through the paired bridge, with versioned and schema-validated events, origin IDs, sequence numbers, deduplication and feedback-loop suppression. Throttle high-frequency playhead events and send the final settled frame. Use an explicit playback-driver lease to avoid two applications fighting over transport controls; surface conflicts for discrete edits rather than silently overwriting them. On reconnect, reconcile from a fresh state snapshot.
+
+Blender's `bpy.app.handlers.frame_change_post` can report frame changes. `bpy.msgbus` can observe supported RNA updates, but its documented limitations mean it does not capture every viewport interaction or animation-system update. Keep network I/O out of Blender callbacks and apply incoming data on Blender's main thread. See [Master Application Controller](MASTER-APPLICATION-CONTROLLER.md) for event protocol and acceptance tests.
+
 ## Delivery milestones
 
 ### Phase 1 — foundation
