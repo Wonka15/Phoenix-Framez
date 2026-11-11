@@ -4,6 +4,7 @@
  */
 import { $, $$, escapeHTML, makeId } from "./core/dom.js";
 import { createStorage } from "./core/storage.js";
+import { createFrameStore } from "./core/frame-store.js";
 import { makeCoverThumbnail, createProject } from "./projects/project-store.js";
 import { normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "./timeline/timeline-model.js";
 import { createOnionSkin } from "./camera/onion-skin.js";
@@ -37,12 +38,14 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   const savedTimeline = normalizeTimeline(storage.read(STORAGE_KEYS.timeline, {}));
   const storedProjects = storage.read(STORAGE_KEYS.projects, []);
   const storedCues = storage.read(STORAGE_KEYS.cues, []);
-  const storedFrames = storage.read(STORAGE_KEYS.frames, []);
+  const legacyStoredFrames = storage.read(STORAGE_KEYS.frames, []);
+  const frameStore = createFrameStore();
+  let frameStoreReady = false;
   const storedAnimationEdits = storage.read(STORAGE_KEYS.animationEdits, {});
   const state = {
     projects: Array.isArray(storedProjects) ? storedProjects : [],
     cues: Array.isArray(storedCues) ? storedCues : [],
-    frames: Array.isArray(storedFrames) ? storedFrames : [],
+    frames: [],
     animationEdits: storedAnimationEdits && typeof storedAnimationEdits === "object" && !Array.isArray(storedAnimationEdits) ? storedAnimationEdits : {},
     markers: savedTimeline.markers,
     tracks: savedTimeline.tracks,
@@ -577,7 +580,11 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
     renderAnimationWorkspace();
-    storage.write(STORAGE_KEYS.frames, state.frames);
+    if (frameStoreReady) frameStore.saveAll(state.frames).catch(error => {
+      console.warn("[PhoenixFramez] IndexedDB frame save failed; using local fallback:", error);
+      storage.write(STORAGE_KEYS.frames, state.frames);
+      notify("Browser frame storage is full or unavailable. Export your project to keep a backup.");
+    });
     $("#frameScrubber").max = state.frames.length || 120;
   }
 
@@ -784,7 +791,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.max(1, state.frame - 1)); });
   $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
   $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame, false));
-  $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); if (state.playing) { stopPlayback(); togglePlayback(); } });
+  $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#captureFps").value = state.playbackFps + " FPS"; $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#loopPlayback").addEventListener("change", event => { state.loopPlayback = event.target.checked; });
 
   $("#copyFrameBtn").addEventListener("click", () => {
@@ -878,7 +885,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     event.target.value = "";
   });
   $("#onionToggle").addEventListener("change", event => onionSkin.setEnabled(event.target.checked));
-  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; });
+  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#aspectRatioSelect").addEventListener("change", event => { $("#cameraViewfinder").dataset.aspect = event.target.value; $("#cameraAspectReadout").textContent = event.target.value; });
   $("#gridGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-grid", event.target.checked));
   $("#safeGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-safe", event.target.checked));
