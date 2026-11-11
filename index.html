@@ -6,6 +6,12 @@
   <meta name="theme-color" content="#10131b">
   <meta name="description" content="PhoenixFramez — a browser-based stop-motion animation production studio.">
   <title>PhoenixFramez 1.0 — Stop-Motion Studio</title>
+  <link rel="icon" type="image/svg+xml" href="assets/phoenix-mark.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PhoenixFramez — Stop-Motion Studio">
+  <meta property="og:description" content="Capture, organize and play stop-motion animation frame by frame.">
+  <meta property="og:image" content="assets/social-preview.svg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/phoenix-redesign.css">
   <script type="module" src="assets/js/app.js"></script>
@@ -43,13 +49,13 @@
       <header class="topbar">
         <button class="mobile-menu" id="menuToggle" aria-label="Toggle navigation">☰</button>
         <div class="breadcrumb">Studio <span>/</span> <strong id="pageName">Overview</strong></div>
-        <div class="topbar-right"><span class="top-status"><i></i> Browser session active</span><div class="avatar">E</div></div>
+        <div class="topbar-right"><button type="button" class="help-button" id="helpButton" aria-label="Open keyboard shortcuts and help">? Help</button><span class="top-status"><i></i> Browser session active</span><div class="avatar">E</div></div>
       </header>
 
       <section class="view active-view" id="overviewView">
         <div class="welcome-row">
           <div><div class="eyebrow">YOUR CREATIVE WORKSPACE</div><h1>Your studio, ready.</h1><p class="muted">Plan your stop-motion film, capture frames, shape your timing, and keep every production asset together.</p></div>
-          <button class="primary-btn" id="newProjectBtn">＋ New project</button>
+          <div class="welcome-actions"><button class="secondary-btn" id="loadDemoBtn">▶ Load demo project</button><button class="primary-btn" id="newProjectBtn">＋ New project</button></div>
         </div>
         <div class="hero-card">
           <div class="hero-copy"><span class="pill">ANIMATION PRODUCTION STUDIO</span><h2>Make every frame<br>count.</h2><p>Organize scenes and shots, prepare frame sequences, and move your production between your favorite animation tools.</p><button class="hero-btn" data-go="timeline">Start editing <span>→</span></button></div>
@@ -111,7 +117,7 @@
             <section class="panel capture-bin"><div class="panel-heading"><div><h3>Frame library</h3><p class="muted">Select an exposure to compare or continue shooting</p></div><span class="frame-count" id="frameCount">0 FRAMES</span></div><div class="frame-library" id="frameLibrary"><div class="frame-empty">Your captured frames will appear here.</div></div><div class="frame-edit-tools"><button class="capture-secondary" id="copyFrameBtn">Copy</button><button class="capture-secondary" id="pasteFrameBtn">Paste</button><button class="capture-secondary" id="insertBlankFrameBtn">＋ Blank</button><button class="capture-secondary" id="deleteFrameBtn">Delete</button></div><p class="footnote">Keyboard: Space plays/pauses · ← / → steps frames · C captures · Delete removes the selected exposure.</p></section>
           </aside>
         </div>
-        <div class="notice"><strong>Camera privacy & compatibility:</strong> camera access requires a secure browser context (HTTPS or localhost) and your permission. PhoenixFramez requests video only, never microphone audio. Manual ISO, shutter, focus and white-balance controls depend on camera-specific support.</div>
+        <div class="camera-export-actions"><button type="button" class="secondary-btn" id="cameraZipExportBtn">Download frame ZIP</button><button type="button" class="secondary-btn" id="cameraWebmExportBtn">Export WebM</button></div><div class="notice"><strong>Camera privacy & compatibility:</strong> camera access requires a secure browser context (HTTPS or localhost) and your permission. PhoenixFramez requests video only, never microphone audio. Manual ISO, shutter, focus and white-balance controls depend on camera-specific support.</div>
       </section>
       <section class="view" id="animation-toolsView">
         <div class="page-intro page-intro-row"><div><div class="eyebrow">DRAW · COMPARE · PLAN</div><h1>Animation tools</h1><p class="muted">Add editable drawing layers, reference overlays and motion-path guides to each stop-motion exposure.</p></div><span class="camera-state"><i></i> Non-destructive workspace</span></div>
@@ -152,7 +158,7 @@
             <div class="inspector-section"><strong>Motion path</strong><p class="muted tiny">Choose Motion path, then tap or click the image to place path points. Undo removes the latest point after strokes.</p><button type="button" class="text-btn" id="clearMotionPathBtn">Clear motion path</button></div>
           </aside>
         </div>
-        <div class="notice"><strong>Layer safety:</strong> drawings, reference images and motion guides are stored as separate per-frame project data. The source still is never painted over.</div>
+        <div class="notice"><strong>Layer safety:</strong> drawings, reference images and motion guides are stored as separate per-frame project data. The original photograph is never altered.</div>
       </section>
 
       <section class="view" id="lipsyncView">
@@ -177,6 +183,6 @@
   </div>
 
   <dialog id="projectDialog" class="project-dialog"><form method="dialog" id="projectForm"><div class="dialog-top"><div><div class="eyebrow">NEW WORKSPACE</div><h2>Create a project</h2></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div><label>Project name<input id="projectNameInput" required maxlength="60" placeholder="e.g. Forest short film"></label><label>Cover thumbnail <input id="projectCoverInput" type="file" accept="image/*"></label><label>Project type<select id="projectTypeInput"><option>Animation</option><option>Stop motion</option><option>LEGO brick animation</option><option>Game cinematics</option><option>Character study</option><option>Other</option></select></label><div class="dialog-actions"><button class="secondary-btn" value="cancel">Cancel</button><button class="primary-btn" id="saveProjectBtn" value="default">Create project</button></div></form></dialog>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="shortcutsDialog" class="help-dialog"><div class="dialog-top"><div><div class="eyebrow">QUICK REFERENCE</div><h2>Studio shortcuts</h2></div><button type="button" class="close-btn" id="helpCloseBtn" aria-label="Close help">×</button></div><div class="shortcut-list"><p><kbd>Space</kbd><span>Play / pause animation</span></p><p><kbd>←</kbd> <kbd>→</kbd><span>Step one frame</span></p><p><kbd>C</kbd><span>Capture a frame in Camera Station</span></p><p><kbd>Delete</kbd><span>Remove selected exposure</span></p><p><kbd>?</kbd><span>Open this help panel</span></p></div><p class="muted tiny">Shortcuts are disabled while typing in text fields.</p></dialog>\n  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
