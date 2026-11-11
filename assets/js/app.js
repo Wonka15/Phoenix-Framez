@@ -475,30 +475,37 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     }
     if (pill) {
       pill.classList.toggle("live", live);
-      pill.innerHTML = "<i></i> " + (live ? "LIVE CAMERA" : "CAMERA OFF");
+      // The header badge is the single camera power status. This pill describes the monitor.
+      pill.innerHTML = "<i></i> " + (live ? "LIVE PREVIEW" : "STANDBY");
     }
     if ($("#cameraPermissionStatus")) $("#cameraPermissionStatus").textContent = message;
   }
 
   async function connectCamera() {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraStatus("Camera access needs HTTPS or localhost and a supported browser.", false);
-      notify("Camera access needs HTTPS or localhost and a supported browser.");
+    if (state.cameraStream || $("#cameraConnectBtn").disabled) return;
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      const message = "Camera access needs HTTPS or localhost and a supported browser. Open the secure GitHub Pages address.";
+      setCameraStatus(message, false);
+      $("#cameraPrivacyStatus").textContent = message;
+      notify(message);
       return;
     }
-    // This function is called only by the user's explicit button press.
+    // Request permission only after the user's explicit power-switch action.
     $("#cameraConnectBtn").disabled = true;
     syncCameraPowerSwitch("pending");
     $("#cameraPrivacyStatus").textContent = "Waiting for your browser's camera permission decision.";
     $("#cameraPermissionStatus").textContent = "Your browser should now ask whether PhoenixFramez may use the camera.";
+    let pendingStream = null;
+    let video = null;
     try {
-      if (!window.isSecureContext) throw new Error("SECURE_CONTEXT_REQUIRED");
       const facing = $("#cameraDeviceSelect")?.value || "environment";
-      state.cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: facing === "user" || facing === "environment" ? { facingMode: { ideal: facing } } : { deviceId: { exact: facing } },
+      pendingStream = await navigator.mediaDevices.getUserMedia({
+        video: facing === "user" || facing === "environment"
+          ? { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+          : { deviceId: { exact: facing } },
         audio: false
       });
-      let video = $("#cameraVideo");
+      video = $("#cameraVideo");
       if (!video) {
         video = document.createElement("video");
         video.id = "cameraVideo";
@@ -508,28 +515,53 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
         video.setAttribute("aria-label", "Local live camera preview");
         $("#cameraViewfinder").prepend(video);
       }
-      video.srcObject = state.cameraStream;
-      await video.play().catch(() => {});
+      video.muted = true;
+      video.playsInline = true;
+      video.srcObject = pendingStream;
+      await video.play();
+      // Do not report the camera as ready until an actual decoded frame is available.
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        await new Promise((resolve, reject) => {
+          const cleanup = () => {
+            video.removeEventListener("loadeddata", onReady);
+            video.removeEventListener("error", onError);
+            window.clearTimeout(timeout);
+          };
+          const onReady = () => { cleanup(); resolve(); };
+          const onError = () => { cleanup(); reject(new Error("CAMERA_FRAME_UNAVAILABLE")); };
+          const timeout = window.setTimeout(() => { cleanup(); reject(new Error("CAMERA_FRAME_TIMEOUT")); }, 8000);
+          video.addEventListener("loadeddata", onReady, { once: true });
+          video.addEventListener("error", onError, { once: true });
+          if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) onReady();
+        });
+      }
+      if (!video.videoWidth || !video.videoHeight) throw new Error("CAMERA_FRAME_UNAVAILABLE");
+      state.cameraStream = pendingStream;
       $("#cameraViewfinder").classList.add("has-camera");
       syncCameraPowerSwitch("on");
       $("#cameraSource").value = "Local camera (browser permission)";
       $("#cameraPrivacyStatus").textContent = "Camera is active locally in this browser. No camera video or audio is sent to PhoenixFramez servers or used for analytics.";
       setCameraStatus("Live preview active. Turn the camera off whenever you like.", true);
-      state.cameraStream.getVideoTracks().forEach(track => {
+      pendingStream.getVideoTracks().forEach(track => {
         track.addEventListener("ended", () => {
-          if (state.cameraStream) disconnectCamera(false);
+          if (state.cameraStream === pendingStream) disconnectCamera(false);
         }, { once: true });
       });
-      notify("Camera connected. Your live feed stays in this browser.");
+      notify("Camera ready. You can now capture frames.");
     } catch (error) {
+      pendingStream?.getTracks().forEach(track => track.stop());
+      if (video) { video.pause(); video.srcObject = null; video.remove(); }
       state.cameraStream = null;
+      $("#cameraViewfinder").classList.remove("has-camera");
       syncCameraPowerSwitch("off");
       const friendly = error.message === "SECURE_CONTEXT_REQUIRED"
         ? "Camera access needs HTTPS or localhost. Open the secure GitHub Pages address."
         : error.name === "NotAllowedError" ? "Camera permission was denied. Allow camera access in your browser's site settings."
         : error.name === "NotFoundError" ? "No camera was found. Connect a camera or import still images."
         : error.name === "NotReadableError" ? "The camera is busy in another app. Close it there and try again."
-        : "Could not start the camera. Try another camera or import still images.";
+        : error.message === "CAMERA_FRAME_TIMEOUT" || error.message === "CAMERA_FRAME_UNAVAILABLE"
+          ? "The camera opened but did not deliver a picture. Check the camera and try again."
+          : "Could not start the camera. Try another camera or import still images.";
       $("#cameraPrivacyStatus").textContent = friendly;
       setCameraStatus(friendly, false);
       notify(friendly);
@@ -601,17 +633,35 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
 
   function captureFrame() {
     const video = $("#cameraVideo");
-    if (!video || !video.videoWidth) return notify("Connect a camera or import a still to add a frame.");
+    const trackIsLive = state.cameraStream?.getVideoTracks().some(track => track.readyState === "live");
+    if (!state.cameraStream || !trackIsLive || !video) {
+      notify("Turn the camera on first, or use Import image to add a still.");
+      return;
+    }
+    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !video.videoWidth || !video.videoHeight) {
+      notify("Camera is starting. Wait for the live picture, then capture again.");
+      return;
+    }
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    state.frames.push({ id: makeId("frame"), projectId: state.activeProjectId, src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
-    frameSequence.replace(state.frames);
-    setFrame(state.frames.length);
-    renderFrames();
-    setMonitorMode("live");
-    notify("Frame " + String(state.frames.length).padStart(3, "0") + " captured.");
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) return notify("Could not prepare the capture image. Please try again.");
+    try {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const image = canvas.toDataURL("image/jpeg", 0.92);
+      if (!image || image === "data:,") throw new Error("EMPTY_CAPTURE");
+      const frame = { id: makeId("frame"), projectId: state.activeProjectId, src: image, createdAt: new Date().toISOString() };
+      state.frames.push(frame);
+      frameSequence.replace(state.frames);
+      setFrame(state.frames.length);
+      renderFrames();
+      setMonitorMode("live");
+      notify("Frame " + String(state.frames.length).padStart(3, "0") + " captured.");
+    } catch (error) {
+      console.warn("[PhoenixFramez] Frame capture failed:", error);
+      notify("The camera image could not be captured. Check the live preview and try again.");
+    }
   }
 
   async function importFrames(files) {
