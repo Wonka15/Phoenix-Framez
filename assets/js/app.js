@@ -111,6 +111,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     const referenceImage = $("#toolsReferenceImage");
     const hasFrame = Boolean(frame?.src);
     currentImage.hidden = !hasFrame;
+    annotationCanvas.style.pointerEvents = hasFrame ? "auto" : "none";
     $("#animationStageEmpty").hidden = hasFrame;
     if (hasFrame && currentImage.src !== frame.src) {
       currentImage.onload = () => {
@@ -145,7 +146,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $$(".nav-item").forEach(button => button.classList.toggle("active", button.dataset.view === name));
     $$(".dock-tool[data-dock-view]").forEach(button => button.classList.toggle("active", button.dataset.dockView === name));
 
-    const labels = { overview: "Overview", lipsync: "Lip Sync", camera: "Camera station", projects: "Projects" };
+    const labels = { overview: "Overview", lipsync: "Lip Sync", camera: "Camera station", projects: "Projects", "animation-tools": "Animation tools" };
     $("#pageName").textContent = labels[name] || name[0].toUpperCase() + name.slice(1);
     $("#sidebar").classList.remove("open");
     window.scrollTo({ top: 0, behavior: "smooth" });
