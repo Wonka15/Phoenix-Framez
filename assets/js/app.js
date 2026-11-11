@@ -682,7 +682,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return notify("WebM recording is not available in this browser. Export a ZIP image sequence instead.");
     const first=new Image();first.src=frames[0].src;try{await first.decode();}catch{return notify("Could not read the first frame.");}
     const canvas=document.createElement("canvas");canvas.width=first.naturalWidth;canvas.height=first.naturalHeight;const ctx=canvas.getContext("2d");
-    const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
+    const stream=canvas.captureStream(state.playbackFps),track=stream.getVideoTracks()[0];const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
     if(!mime){stream.getTracks().forEach(t=>t.stop());return notify("This browser does not support WebM recording.");}
     const recorder=new MediaRecorder(stream,{mimeType:mime}),chunks=[];recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
     const done=new Promise(resolve=>recorder.onstop=resolve);recorder.start();
