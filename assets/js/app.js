@@ -580,11 +580,15 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
     renderAnimationWorkspace();
-    if (frameStoreReady) frameStore.saveAll(state.frames).catch(error => {
-      console.warn("[PhoenixFramez] IndexedDB frame save failed; using local fallback:", error);
+    if (frameStoreReady) {
+      frameStore.saveAll(state.frames).catch(error => {
+        console.warn("[PhoenixFramez] IndexedDB frame save failed; using local fallback:", error);
+        storage.write(STORAGE_KEYS.frames, state.frames);
+        notify("Browser frame storage is full or unavailable. Export your project to keep a backup.");
+      });
+    } else {
       storage.write(STORAGE_KEYS.frames, state.frames);
-      notify("Browser frame storage is full or unavailable. Export your project to keep a backup.");
-    });
+    }
     $("#frameScrubber").max = state.frames.length || 120;
   }
 
