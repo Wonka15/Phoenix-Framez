@@ -201,7 +201,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     $("#playTimeline").setAttribute("aria-label", "Play timeline");
   }
 
-  function togglePlayback(startAt = null, endAt = null) {
+  function togglePlayback(startAt = null, endAt = null, loopOverride = null) {
     if (state.playing) return stopPlayback();
     if (startAt !== null) setFrame(startAt);
     setMonitorMode("animation");
@@ -210,7 +210,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     $("#playTimeline").textContent = "Ⅱ";
     $("#playTimeline").setAttribute("aria-label", "Pause animation");
     state.playTimer = window.setInterval(() => {
-      const next = nextFrameIndex(state.frame, finalFrame, state.loopPlayback);
+      const next = nextFrameIndex(state.frame, finalFrame, loopOverride ?? state.loopPlayback);
       if (next === null) return stopPlayback();
       setFrame(next);
     }, 1000 / state.playbackFps);
@@ -393,7 +393,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     $("#exposureSheet").innerHTML = state.frames.length
       ? state.frames.map((frame, index) => renderCell(frame, index, true)).join("")
       : '<span class="muted tiny">Capture or import stills to build your exposure sheet.</span>';
-    $$("[data-frame-index]").forEach(button => button.addEventListener("click", () => setFrame(Number(button.dataset.frameIndex) + 1)));
+    $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
     storage.write(STORAGE_KEYS.frames, state.frames);
     $("#frameScrubber").max = Math.max(120, state.frames.length);
@@ -528,7 +528,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   $("#animationViewModeBtn").addEventListener("click", () => setMonitorMode("animation"));
   $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.max(1, state.frame - 1)); });
   $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
-  $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame));
+  $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame, false));
   $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#loopPlayback").addEventListener("change", event => { state.loopPlayback = event.target.checked; });
 
