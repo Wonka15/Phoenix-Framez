@@ -49,7 +49,7 @@ The workflow in `.github/workflows/pages.yml` deploys the site when changes are 
 
 ## Master Application Controller
 
-PhoenixFrame is intended to act as the production hub for supported third-party applications. The GitHub Pages site cannot directly launch or control native desktop applications; that requires an optional local bridge running on the creator's computer. The bridge will use paired, allowlisted adapters rather than arbitrary shell or script execution. Blender is the first planned adapter. See [Master Application Controller](docs/MASTER-APPLICATION-CONTROLLER.md) for the design, security boundaries, Blender version targets and implementation milestones.
+PhoenixFrame is intended to act as the production hub for supported third-party applications, with bidirectional live synchronization for supported properties. For example, scrubbing in PhoenixFrame can move Blender's playhead, and scrubbing in Blender can update PhoenixFrame. The GitHub Pages site cannot directly control native desktop applications; this requires an optional local bridge running on the creator's computer. The bridge will use paired, allowlisted adapters rather than arbitrary shell or script execution. Blender is the first planned adapter. See [Master Application Controller](docs/MASTER-APPLICATION-CONTROLLER.md) for the design, security boundaries, Blender version targets and implementation milestones.
 
 ## Integration and licensing boundaries
 
