@@ -62,3 +62,9 @@ Eagle Animation, Toucan, Python, Blender and Godot integrations are planned, not
 ## License
 
 See [LICENSE](LICENSE).
+
+## Studio interface status
+
+The current `ndev` interface includes a touch-friendly floating tool dock, visual project browser with locally saved project cards, a prototype timeline with playhead and draggable clips, a camera-station layout, and responsive iPad/mobile navigation.
+
+The camera station can request a browser camera feed over a secure context and capture stills where browser permissions and hardware allow. Toucan Camera Server is not connected yet. The timeline and project library are front-end prototypes; bidirectional Blender control still requires the separate local bridge and Blender adapter described in the integration documents. Do not treat roadmap integrations as active connections.
