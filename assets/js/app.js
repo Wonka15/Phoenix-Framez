@@ -10,6 +10,7 @@ import { createOnionSkin } from "./camera/onion-skin.js";
 import { createFrameSequence } from "./animation/frame-sequence.js";
 import { createAudioEngine } from "./audio/audio-engine.js";
 import { buildProjectArchive, validateProjectArchive, downloadJson } from "./export/project-archive.js";
+import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from "./animation/stop-motion.js";
 
 /**
  * PhoenixFrame 1.0 — browser studio controller
@@ -48,7 +49,11 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     projectLayout: "grid",
     cameraStream: null,
     activeProjectId: null,
-    selectedFrameIndex: -1
+    selectedFrameIndex: -1,
+    playbackFps: 24,
+    loopPlayback: true,
+    intervalTimer: null,
+    intervalRunning: false
   };
 
   const dialog = $("#projectDialog");
@@ -161,10 +166,16 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 
   // ---------- Timeline model and rendering ----------
   function setFrame(value) {
-    state.frame = Math.max(0, Math.min(120, Math.round(Number(value) || 0)));
+    // Animator-facing frame numbers are 1-based; array indices remain 0-based.
+    const maxFrame = Math.max(120, state.frames.length);
+    state.frame = Math.max(1, Math.min(maxFrame, Math.round(Number(value) || 1)));
+    state.selectedFrameIndex = state.frames.length ? Math.min(state.frames.length - 1, state.frame - 1) : -1;
+    $("#frameScrubber").max = maxFrame;
     $("#frameScrubber").value = state.frame;
-    $("#currentFrameLabel").textContent = "Frame " + String(state.frame).padStart(3, "0");
+    $("#currentFrameLabel").textContent = frameLabel(state.frame);
     $("#scrubberValue").textContent = String(state.frame).padStart(3, "0");
+    $("#captureFrameReadout").textContent = "FRAME " + String(state.frame).padStart(3, "0");
+    syncFrameSelection();
   }
 
   function stopPlayback() {
@@ -175,12 +186,18 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     $("#playTimeline").setAttribute("aria-label", "Play timeline");
   }
 
-  function togglePlayback() {
+  function togglePlayback(startAt = null, endAt = null) {
     if (state.playing) return stopPlayback();
+    if (startAt !== null) setFrame(startAt);
+    const finalFrame = endAt ?? Math.max(1, state.frames.length || 120);
     state.playing = true;
     $("#playTimeline").textContent = "Ⅱ";
-    $("#playTimeline").setAttribute("aria-label", "Pause timeline");
-    state.playTimer = window.setInterval(() => setFrame(state.frame >= 120 ? 0 : state.frame + 1), 1000 / 24);
+    $("#playTimeline").setAttribute("aria-label", "Pause animation");
+    state.playTimer = window.setInterval(() => {
+      const next = nextFrameIndex(state.frame, finalFrame, state.loopPlayback);
+      if (next === null) return stopPlayback();
+      setFrame(next);
+    }, 1000 / state.playbackFps);
   }
 
   function renderTimeline() {
@@ -338,19 +355,32 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     notify("Camera disconnected.");
   }
 
+  function syncFrameSelection() {
+    // Highlight the current exposure without rebuilding thumbnails on every playback tick.
+    $$(".frame-select, .exposure-cell").forEach(button => {
+      button.classList.toggle("selected", Number(button.dataset.frameIndex) === state.selectedFrameIndex);
+    });
+    onionSkin.setSource(previousFrameSource(state.frames, state.selectedFrameIndex));
+    $("#exposureCount").textContent = state.frames.length + " exposures";
+  }
+
   function renderFrames() {
     frameSequence.replace(state.frames);
     $("#frameCount").textContent = state.frames.length + " FRAMES";
+    const renderCell = (frame, index, exposure = false) => {
+      const image = frame.blank ? '<span class="frame-thumb blank-frame">BLANK</span>' : '<img class="frame-thumb" src="' + frame.src + '" alt="" loading="lazy">';
+      return '<button type="button" class="' + (exposure ? "exposure-cell" : "frame-select") + (index === state.selectedFrameIndex ? " selected" : "") + '" data-frame-index="' + index + '" aria-label="Select exposure ' + (index + 1) + '">' + image + '<small>' + String(index + 1).padStart(3, "0") + '</small></button>';
+    };
     $("#frameLibrary").innerHTML = state.frames.length
-      ? state.frames.map((frame, index) => '<button type="button" class="frame-select' + (index === state.selectedFrameIndex ? ' selected' : '') + '" data-frame-index="' + index + '" aria-label="Select frame ' + (index + 1) + '">' +
-        (frame.blank ? '<span class="frame-thumb blank-frame">BLANK</span>' : '<img class="frame-thumb" src="' + frame.src + '" alt="" loading="lazy">') + '</button>').join("")
-      : '<div class="frame-empty">Your captured frames will appear here.</div>';
-    $("[data-frame-index]").forEach(button => button.addEventListener("click", () => {
-      state.selectedFrameIndex = Number(button.dataset.frameIndex);
-      renderFrames();
-    }));
-    onionSkin.setSource(state.frames.find(frame => frame.src)?.src || "");
+      ? state.frames.map((frame, index) => renderCell(frame, index)).join("")
+      : '<div class="frame-empty">Capture or import your first still.</div>';
+    $("#exposureSheet").innerHTML = state.frames.length
+      ? state.frames.map((frame, index) => renderCell(frame, index, true)).join("")
+      : '<span class="muted tiny">Capture or import stills to build your exposure sheet.</span>';
+    $$("[data-frame-index]").forEach(button => button.addEventListener("click", () => setFrame(Number(button.dataset.frameIndex) + 1)));
+    syncFrameSelection();
     storage.write(STORAGE_KEYS.frames, state.frames);
+    $("#frameScrubber").max = Math.max(120, state.frames.length);
   }
 
   function captureFrame() {
@@ -360,9 +390,10 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    state.frames.unshift({ src: canvas.toDataURL("image/jpeg", 0.78), createdAt: new Date().toISOString() });
+    state.frames.push({ id: makeId("frame"), src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
+    setFrame(state.frames.length);
     renderFrames();
-    notify("Still captured.");
+    notify("Frame " + String(state.frames.length).padStart(3, "0") + " captured.");
   }
 
   async function importFrames(files) {
@@ -376,12 +407,31 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
         canvas.height = Math.max(1, Math.round(bitmap.height * scale));
         canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         bitmap.close?.();
-        state.frames.unshift({ src: canvas.toDataURL("image/jpeg", 0.78), createdAt: new Date().toISOString() });
+        state.frames.push({ id: makeId("frame"), src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString(), source: file.name });
       } catch (error) {
         console.warn("[PhoenixFrame] Skipped an unreadable image:", error);
       }
     }
+    if (state.frames.length) setFrame(state.frames.length);
     renderFrames();
+  }
+
+  function toggleIntervalCapture() {
+    if (state.intervalRunning) {
+      window.clearInterval(state.intervalTimer);
+      state.intervalTimer = null;
+      state.intervalRunning = false;
+      $("#intervalCaptureBtn").textContent = "Start interval";
+      notify("Interval capture stopped.");
+      return;
+    }
+    if (!state.cameraStream) return notify("Connect a camera before starting interval capture.");
+    const seconds = Math.max(1, Math.min(3600, Number($("#intervalSeconds").value) || 5));
+    state.intervalRunning = true;
+    $("#intervalCaptureBtn").textContent = "Stop interval";
+    captureFrame();
+    state.intervalTimer = window.setInterval(captureFrame, seconds * 1000);
+    notify("Interval capture started: every " + seconds + " seconds.");
   }
 
   // ---------- Portable project snapshot ----------
@@ -454,7 +504,12 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     stopPlayback();
     setFrame(event.target.value);
   });
-  $("#playTimeline").addEventListener("click", togglePlayback);
+  $("#playTimeline").addEventListener("click", () => togglePlayback());
+  $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setFrame(Math.max(1, state.frame - 1)); });
+  $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
+  $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame));
+  $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); if (state.playing) { stopPlayback(); togglePlayback(); } });
+  $("#loopPlayback").addEventListener("change", event => { state.loopPlayback = event.target.checked; });
 
   $("#copyFrameBtn").addEventListener("click", () => {
     if (!frameSequence.copy(state.selectedFrameIndex)) return notify("Select a frame to copy first.");
@@ -505,6 +560,13 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     event.target.value = "";
   });
   $("#onionToggle").addEventListener("change", event => onionSkin.setEnabled(event.target.checked));
+  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; });
+  $("#aspectRatioSelect").addEventListener("change", event => { $("#cameraViewfinder").dataset.aspect = event.target.value; $("#cameraAspectReadout").textContent = event.target.value; });
+  $("#gridGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-grid", event.target.checked));
+  $("#safeGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-safe", event.target.checked));
+  $("#maskGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-mask", event.target.checked));
+  $("#captureBlackoutToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("capture-blackout", event.target.checked));
+  $("#intervalCaptureBtn").addEventListener("click", toggleIntervalCapture);
   $("#onionOpacity").addEventListener("input", event => onionSkin.setOpacity(event.target.value));
   onionSkin.setEnabled($("#onionToggle").checked);
   onionSkin.setOpacity($("#onionOpacity").value);
@@ -513,6 +575,7 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     stopPlayback();
     state.cameraStream?.getTracks().forEach(track => track.stop());
     audioEngine.dispose();
+    window.clearInterval(state.intervalTimer);
   });
 
   // ---------- Initial render ----------
