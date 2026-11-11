@@ -20,7 +20,7 @@ Acceptance: all navigation targets work at iPad, tablet, desktop and narrow-phon
 - [x] Search and grid/list layouts.
 - [x] Project creation and local browser persistence.
 - [x] Export a versioned JSON project snapshot.
-- [ ] Import and validate a versioned project snapshot.
+- [x] Import and validate a versioned project snapshot.
 - [ ] Scene, shot and take hierarchy with stable IDs.
 - [ ] Per-project asset folders and thumbnail regeneration.
 - [ ] Autosave, recovery and storage quota management.
@@ -34,7 +34,7 @@ Acceptance: a project survives reload, cover thumbnails render, exported JSON va
 - [x] Still capture from browser camera.
 - [x] Import still images into a local frame library.
 - [x] Local persistence for imported/captured frames.
-- [ ] True previous/next-frame onion-skin compositing with opacity controls.
+- [x] Previous-frame still overlay with opacity controls (previous captured/imported still; next-frame ghosting remains future work).
 - [ ] Exposure, focus, ISO and white-balance controls where the connected camera API supports them.
 - [ ] Timelapse / interval capture with pause, stop and error recovery.
 - [ ] Toucan Camera Server adapter and tested camera compatibility list.
@@ -52,7 +52,7 @@ Acceptance: test built-in camera and supported external camera devices on iPad S
 - [ ] Touch-first track reordering and clip resizing handles.
 - [ ] Frame-by-frame capture strip and exposure-sheet view.
 - [ ] Undo/redo command history.
-- [ ] Copy, paste, cut, insert and duplicate frames.
+- [x] Copy, paste, insert blank and delete stills in the frame library.\n- [ ] Cut, duplicate, and timeline-integrated frame editing.
 - [ ] Multi-select and ripple editing.
 - [ ] Audio waveform tracks and synchronized playback.
 - [ ] Timeline zoom, pan, snapping and frame-range controls.
@@ -74,7 +74,7 @@ These are substantial editing features. They should be implemented as independen
 
 ## 6. Sound and finishing
 
-- [ ] Voiceover and narration recording with explicit microphone permission.
+- [x] Import and preview a local voiceover/reference audio file.\n- [ ] Voiceover and narration recording with explicit microphone permission.
 - [ ] Import audio and add sound-effect / music tracks.
 - [ ] Waveform display and frame-accurate audio alignment.
 - [ ] Audio levels, fades and mixdown.
@@ -113,7 +113,7 @@ The static GitHub Pages site cannot itself provide unrestricted local filesystem
 
 No native application integration is complete until it passes the documented acceptance tests in `MASTER-APPLICATION-CONTROLLER.md`.
 
-## Code quality rules
+## Modular code structure\n\n- `assets/js/core/`: shared DOM and local-storage helpers.\n- `assets/js/projects/`: project creation and cover-thumbnail processing.\n- `assets/js/timeline/`: pure timeline data model and frame-range rules.\n- `assets/js/camera/`: camera monitor onion-skin overlay.\n- `assets/js/animation/`: still-frame sequence operations.\n- `assets/js/audio/`: local audio preview and object-URL lifecycle.\n- `assets/js/export/`: versioned archive creation, validation and download.\n- `assets/js/app.js`: browser entry point, workspace rendering and event orchestration.\n- `tests/`: Node built-in unit tests for data operations.\n\n## Code quality rules
 
 1. Keep HTML semantic and keep behavior out of inline event attributes.
 2. Keep CSS grouped by design tokens, shared components, workspace components and responsive/accessibility overrides.
