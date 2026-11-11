@@ -1,0 +1,71 @@
+/* Expanded PhoenixFramez stop-motion camera workspace.
+   Layout is deliberately touch-friendly and keeps the live image as the focal point. */
+#cameraView .camera-layout-expanded{grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+#cameraView .camera-monitor{padding:clamp(14px,2vw,24px)}
+#cameraView .monitor-top{align-items:center}
+#cameraView .monitor-top small{font-size:12px;letter-spacing:0}
+#cameraView .monitor-actions{display:flex;align-items:center;gap:10px}
+#cameraView .camera-viewfinder{
+  width:100%;aspect-ratio:16/9;min-height:clamp(380px,58vw,760px);max-height:76vh;
+  border-radius:18px;background:radial-gradient(ellipse at 50% 40%,#4a2928 0%,#24191b 48%,#100e12 100%);
+}
+#cameraView .camera-viewfinder[data-aspect="4:3"]{aspect-ratio:4/3}
+#cameraView .camera-viewfinder[data-aspect="1:1"]{aspect-ratio:1/1}
+#cameraView .camera-viewfinder[data-aspect="2.39:1"]{aspect-ratio:2.39/1}
+#cameraView .camera-viewfinder.is-expanded{max-height:none;min-height:82vh;aspect-ratio:unset}
+#cameraView .camera-viewfinder video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0}
+#cameraView .camera-viewfinder .viewfinder-grid{z-index:2;pointer-events:none}
+#cameraView .camera-viewfinder .focus-reticle{z-index:3;pointer-events:none}
+#cameraView .camera-viewfinder .viewfinder-center{position:relative;z-index:4;max-width:90%;padding:24px}
+#cameraView .camera-viewfinder.has-camera .viewfinder-center{display:none}
+#cameraView .camera-viewfinder .viewfinder-meta{z-index:5}
+#cameraView .camera-viewfinder .onion-skin-image{z-index:1;object-fit:contain;mix-blend-mode:screen}
+#cameraView .camera-viewfinder.show-animation-frame #cameraVideo{opacity:0}
+#cameraView .preview-pill{font-size:10px}
+#cameraView .preview-pill.live{color:#b7f0c8;border-color:#73d69a66}
+#cameraView .capture-controls{justify-content:center;gap:clamp(14px,3vw,28px);padding:20px 0 16px}
+#cameraView .capture-secondary{font-size:12px;min-height:42px;padding:10px 16px}
+#cameraView .shutter-btn{width:64px;height:64px}
+#cameraView .shutter-btn span{width:44px;height:44px}
+#cameraView .camera-privacy-note{display:flex;gap:13px;align-items:flex-start;padding:15px 17px;border:1px solid rgba(255,185,132,.2);border-radius:14px;background:rgba(226,111,58,.075);color:#e9d8ca}
+#cameraView .camera-privacy-note .privacy-lock{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:10px;background:rgba(226,111,58,.16);color:#ffc18e;font-size:17px}
+#cameraView .camera-privacy-note strong{display:block;color:#ffe1c9;font-size:13px;margin:1px 0 5px}
+#cameraView .camera-privacy-note p{font-size:11px;line-height:1.6;margin:0;color:#cbbdb2}
+#cameraView .camera-privacy-note small{display:block;color:#e9aa7a;font-size:10px;margin-top:8px}
+#cameraView .camera-side{grid-template-columns:minmax(280px,.8fr) minmax(0,1.5fr);align-items:start;gap:16px}
+#cameraView .camera-settings,#cameraView .capture-bin{padding:clamp(14px,1.8vw,22px)}
+#cameraView .camera-settings label{font-size:12px}
+#cameraView .camera-settings select,#cameraView .camera-settings input[type=number]{min-height:40px;font-size:12px}
+#cameraView .onion-control-panel{margin-top:18px;padding:15px;border:1px solid rgba(255,190,145,.19);border-radius:13px;background:rgba(255,255,255,.035)}
+#cameraView .onion-control-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#cameraView .onion-control-heading strong,#cameraView .onion-control-heading small{display:block}
+#cameraView .onion-control-heading strong{font-size:13px;color:#ffe4d0}
+#cameraView .onion-control-heading small{font-size:10px;color:var(--muted);margin-top:4px}
+#cameraView .switch-label{display:flex;align-items:center;gap:7px;color:#f5c19d;font-size:11px;white-space:nowrap}
+#cameraView .switch-label input,#cameraView .guide-controls input{accent-color:#ed925b;width:17px;height:17px}
+#cameraView .opacity-label{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:11px}
+#cameraView .opacity-label output{color:#ffc08d;font-variant-numeric:tabular-nums}
+#cameraView #onionOpacity{width:100%;accent-color:#ed925b;margin:10px 0 0;padding:0}
+#cameraView .opacity-scale{display:flex;justify-content:space-between;color:#9d9188;font-size:9px;margin-top:2px}
+#cameraView .onion-control-panel .tiny{font-size:10px;line-height:1.5;margin:10px 0 0}
+#cameraView .frame-library{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;max-height:390px;overflow:auto;padding:4px 2px}
+#cameraView .frame-select{min-width:0;border-radius:10px;padding:5px}
+#cameraView .frame-select .frame-thumb{aspect-ratio:4/3;height:auto;object-fit:cover}
+#cameraView .frame-select small{font-size:10px}
+#cameraView .frame-edit-tools{gap:8px;flex-wrap:wrap}
+#cameraView .camera-state{display:inline-flex;align-items:center;gap:8px}
+#cameraView .camera-state i{width:8px;height:8px;border-radius:50%;background:#8e938f}
+#cameraView .camera-state.is-live i{background:#68d994;box-shadow:0 0 10px #68d994}
+@media(max-width:900px){
+  #cameraView .camera-side{grid-template-columns:1fr}
+  #cameraView .camera-viewfinder{min-height:clamp(300px,58vw,580px)}
+}
+@media(max-width:600px){
+  #cameraView .camera-viewfinder{min-height:250px;max-height:none;aspect-ratio:4/3}
+  #cameraView .camera-viewfinder.is-expanded{min-height:68vh}
+  #cameraView .monitor-actions{align-items:flex-end;flex-direction:column}
+  #cameraView .capture-controls{gap:8px}
+  #cameraView .capture-secondary{padding:9px 11px;font-size:11px}
+  #cameraView .camera-privacy-note{padding:12px}
+  #cameraView .frame-library{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
