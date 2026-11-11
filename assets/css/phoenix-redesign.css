@@ -274,3 +274,37 @@ input:focus,select:focus,textarea:focus{
 }
 @media(prefers-reduced-motion:reduce){.home-action-card{transition:none}}
 
+/* iPad Studio Home layout: give tablet widths room to breathe. */
+@media (min-width:701px) and (max-width:1120px){
+  #overviewView{max-width:100%;padding-inline:clamp(14px,2.2vw,28px)}
+  .home-welcome{align-items:flex-start;gap:18px;margin:8px 0 22px}
+  .home-welcome h1{font-size:clamp(29px,3.6vw,38px);line-height:1.08}
+  .home-welcome p{max-width:480px;font-size:13px}
+  .home-welcome>.primary-btn{min-height:48px;padding-inline:18px}
+  .home-quick-start{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:26px}
+  .home-action-card{min-height:132px;padding:17px;gap:12px;border-radius:16px}
+  .home-action-icon{flex-basis:44px;width:44px;height:44px;border-radius:13px;font-size:22px}
+  .home-action-copy{gap:6px}
+  .home-action-copy strong{font-size:15px}
+  .home-action-copy small{font-size:11px;line-height:1.5}
+  .home-action-copy em{font-size:10px}
+  .home-action-card:last-child{grid-column:1 / -1;min-height:98px;align-items:center}
+  .home-section-heading{margin-bottom:12px}
+  .home-recent-panel{padding:8px 16px;min-height:140px}
+  .home-setup{margin-top:14px}
+}
+@media (min-width:701px) and (max-width:960px){
+  .home-welcome{flex-direction:column;align-items:stretch}
+  .home-welcome>.primary-btn{align-self:flex-start;min-width:190px}
+  .home-quick-start{grid-template-columns:minmax(0,1fr);gap:9px}
+  .home-action-card,.home-action-card:last-child{grid-column:auto;min-height:100px;align-items:center;padding:14px 16px}
+  .home-action-icon{flex-basis:46px;width:46px;height:46px}
+  .home-action-copy{gap:5px}
+  .home-action-copy small{max-width:52ch}
+  .home-section-heading h2{font-size:20px}
+  .home-session-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (hover:none) and (min-width:701px){
+  .home-action-card{transition:none;box-shadow:inset 0 1px rgba(255,255,255,.07),0 8px 20px rgba(0,0,0,.16)}
+  .home-action-card:active{border-color:rgba(255,174,119,.4);background-color:rgba(255,143,78,.07)}
+}
