@@ -492,8 +492,10 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $("#cameraPrivacyStatus").textContent = "Waiting for your browser's camera permission decision.";
     $("#cameraPermissionStatus").textContent = "Your browser should now ask whether PhoenixFramez may use the camera.";
     try {
+      if (!window.isSecureContext) throw new Error("SECURE_CONTEXT_REQUIRED");
+      const facing = $("#cameraDeviceSelect")?.value || "environment";
       state.cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
+        video: facing === "user" || facing === "environment" ? { facingMode: { ideal: facing } } : { deviceId: { exact: facing } },
         audio: false
       });
       let video = $("#cameraVideo");
@@ -522,11 +524,15 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     } catch (error) {
       state.cameraStream = null;
       syncCameraPowerSwitch("off");
-      $("#cameraPrivacyStatus").textContent = error.name === "NotAllowedError"
-        ? "Camera permission was denied or blocked. You can change this in your browser's site settings."
-        : "No camera feed was started. No camera frames were received.";
-      setCameraStatus(error.name === "NotAllowedError" ? "Permission denied. Check browser site settings to allow camera access." : "Could not start the camera. Check that a camera is connected and not being used by another app.", false);
-      notify(error.name === "NotAllowedError" ? "Camera permission was denied." : "Could not connect to a camera.");
+      const friendly = error.message === "SECURE_CONTEXT_REQUIRED"
+        ? "Camera access needs HTTPS or localhost. Open the secure GitHub Pages address."
+        : error.name === "NotAllowedError" ? "Camera permission was denied. Allow camera access in your browser's site settings."
+        : error.name === "NotFoundError" ? "No camera was found. Connect a camera or import still images."
+        : error.name === "NotReadableError" ? "The camera is busy in another app. Close it there and try again."
+        : "Could not start the camera. Try another camera or import still images.";
+      $("#cameraPrivacyStatus").textContent = friendly;
+      setCameraStatus(friendly, false);
+      notify(friendly);
     } finally {
       $("#cameraConnectBtn").disabled = false;
     }
@@ -733,6 +739,9 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#exportSelectedFramesBtn").addEventListener("click", exportSelectedProjectFrames);
   $("#exportSequenceZipBtn").addEventListener("click", () => { const project=state.projects.find(item=>item.id===state.selectedExportProjectId); exportZip(project?getExportFrames(project):state.frames); });
   $("#exportWebmBtn").addEventListener("click", exportWebM);
+  $("#cameraZipExportBtn").addEventListener("click", () => exportZip());
+  $("#cameraWebmExportBtn").addEventListener("click", exportWebM);
+  $("#cameraDeviceSelect").addEventListener("change", () => { if(state.cameraStream){ disconnectCamera(false); connectCamera(); } });
   $("#loadDemoBtn").addEventListener("click", loadDemoProject);
   $("#helpButton").addEventListener("click", () => $("#shortcutsDialog").showModal());
   $("#helpCloseBtn").addEventListener("click", () => $("#shortcutsDialog").close());
@@ -968,7 +977,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     const target = event.target;
     if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
     if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (event.code === "Space") {
+    if (event.key === "?") { $("#shortcutsDialog").showModal(); } else if (event.code === "Space") {
       event.preventDefault();
       togglePlayback();
     } else if (event.key === "ArrowLeft") {
