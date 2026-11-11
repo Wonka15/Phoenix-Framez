@@ -82,3 +82,8 @@ New features should be implemented behind small functions with stable data IDs, 
 PhoenixFrame uses native browser ES modules and has no runtime package dependencies. Install Node.js 22, then run `npm run check` to syntax-check every JavaScript module, run the unit tests, verify duplicate HTML IDs, and validate local module import paths. GitHub Actions runs the same checks on pushes to `ndev` and `main` and on pull requests to `main`.
 
 The studio is organized by feature under `assets/js/`: `core`, `projects`, `timeline`, `camera`, `animation`, `audio`, and `export`. `assets/js/app.js` remains the UI composition entry point. See `docs/IMPLEMENTATION-PLAN.md` for the full status and remaining acceptance tests.
+
+
+## Static build
+
+Run `npm run build` to run all quality checks and create the deployable GitHub Pages site in `dist/`. The build copies the HTML and native ES modules without a bundler or runtime dependencies. GitHub Pages deploys the generated `dist/` directory from the `ndev` branch workflow.
