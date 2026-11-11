@@ -38,7 +38,10 @@ test("frame sequence supports copy, paste, blank insert and delete", () => {
 test("project archive validates v1 data and rejects unknown formats", () => {
   const archive = buildProjectArchive({ projects: [], cues: [], frames: [], markers: [], tracks: [] });
   assert.equal(validateProjectArchive(archive).version, 1);
+  assert.deepEqual(validateProjectArchive(archive).animationEdits, {});
+  assert.deepEqual(validateProjectArchive({ ...archive, animationEdits: { "frame-0": { strokes: [] } } }).animationEdits, { "frame-0": { strokes: [] } });
   assert.throws(() => validateProjectArchive({ format: "other", version: 1 }), /not a supported/);
+  assert.throws(() => validateProjectArchive({ ...archive, animationEdits: [] }), /animation layer data is invalid/);
 });
 
 test("stop-motion transport respects supported frame rates and sequence boundaries", () => {
