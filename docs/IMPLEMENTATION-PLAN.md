@@ -72,6 +72,9 @@ Acceptance: all edits are frame-accurate, survive reload, are undoable, and work
 - [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
 - [x] Per-frame non-destructive pen, line, arrow and eraser drawing layers.
 - [x] Undo and clear drawing operations for the current exposure.
+- [x] Per-frame reference-image overlays with adjustable opacity.
+- [x] Previous-exposure difference blend view.
+- [x] Per-frame motion-path guides with independently editable points.
 - [ ] Text cards and speech bubbles.
 - [ ] Rotoscoping over imported video.
 - [ ] Object removal / eraser and facial-expression overlays.
