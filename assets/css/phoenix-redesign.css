@@ -177,3 +177,37 @@ input:focus,select:focus,textarea:focus{
 @media(prefers-reduced-transparency:reduce){
   body{background:#171310}
 }
+
+/* Phoenix emblem: a living ember glow that gently flares, then settles. */
+@keyframes phoenix-ember-breathe{
+  0%, 100%{
+    box-shadow:0 0 7px rgba(255,105,42,.18),0 0 17px rgba(255,105,42,.09),inset 0 0 5px rgba(255,180,112,.08);
+  }
+  38%{
+    box-shadow:0 0 13px rgba(255,115,45,.42),0 0 30px rgba(255,105,35,.24),0 0 46px rgba(255,145,65,.10),inset 0 0 8px rgba(255,190,125,.14);
+  }
+  44%{
+    box-shadow:0 0 5px rgba(255,105,42,.12),0 0 13px rgba(255,105,42,.06),inset 0 0 4px rgba(255,180,112,.06);
+  }
+  72%{
+    box-shadow:0 0 16px rgba(255,125,50,.48),0 0 36px rgba(255,105,35,.26),0 0 54px rgba(255,145,65,.12),inset 0 0 9px rgba(255,190,125,.16);
+  }
+}
+@keyframes phoenix-ember-image{
+  0%,100%{filter:drop-shadow(0 0 2px rgba(255,116,48,.22)) drop-shadow(0 0 5px rgba(255,82,30,.10));}
+  40%{filter:drop-shadow(0 0 5px rgba(255,145,65,.55)) drop-shadow(0 0 13px rgba(255,80,25,.32));}
+  46%{filter:drop-shadow(0 0 2px rgba(255,116,48,.16));}
+  73%{filter:drop-shadow(0 0 7px rgba(255,157,76,.62)) drop-shadow(0 0 17px rgba(255,80,25,.35));}
+}
+.brand-mark{
+  animation:phoenix-ember-breathe 5.8s ease-in-out infinite;
+  will-change:box-shadow;
+}
+.brand-mark img{
+  animation:phoenix-ember-image 5.8s ease-in-out infinite;
+  will-change:filter;
+}
+@media(prefers-reduced-motion:reduce){
+  .brand-mark,.brand-mark img{animation:none;will-change:auto}
+}
+
