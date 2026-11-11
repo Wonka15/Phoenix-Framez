@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/phoenix-redesign.css">
   <script type="module" src="assets/js/app.js"></script>
   <link rel="stylesheet" href="assets/css/camera-workspace.css">
+  <link rel="stylesheet" href="assets/css/beginner-export.css">
 </head>
 <body>
   <div class="app-shell">
@@ -71,6 +72,7 @@
         <div class="page-intro page-intro-row"><div><div class="eyebrow">YOUR PRODUCTIONS</div><h1>Project browser</h1><p class="muted">A visual home for every film, sequence and creative experiment.</p></div><button class="primary-btn" id="browserNewProject">＋ New project</button></div>
         <div class="browser-tools"><div class="search-wrap"><span>⌕</span><input id="projectSearch" type="search" placeholder="Find a project…" aria-label="Find a project"></div><div class="browser-actions"><button class="secondary-btn" id="importProjectBtn">Import project</button><input type="file" id="projectArchiveInput" accept=".json,application/json" hidden><div class="view-toggle"><button class="view-toggle-btn active" data-project-layout="grid">▦ Grid</button><button class="view-toggle-btn" data-project-layout="list">☷ List</button></div></div></div>
         <div id="projectBrowserGrid" class="project-browser-grid"><div class="browser-empty"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span><strong>Your next production starts here.</strong><p>Create a project to see it appear in your library.</p><button class="secondary-btn" id="browserEmptyCreate">Create project</button></div></div>
+        <section class="panel project-export-panel" id="projectExportPanel" hidden aria-labelledby="projectExportTitle"><div class="panel-heading"><div><div class="eyebrow">SAVE &amp; SHARE</div><h2 id="projectExportTitle">Export project</h2><p class="muted" id="projectExportDescription">Choose what you want to save.</p></div><button type="button" class="text-btn" id="closeProjectExportBtn">Close</button></div><div class="project-export-actions"><button type="button" class="primary-btn" id="exportSelectedArchiveBtn">Download project file (.json)</button><button type="button" class="secondary-btn" id="exportSelectedFramesBtn">Download captured frames</button></div><p class="footnote">Project files keep your production data portable. Captured images are downloaded separately as JPG files. Exports are created on this device.</p></section>
       </section>
 
       <section class="view" id="timelineView">
@@ -81,6 +83,7 @@
 
       <section class="view" id="cameraView">
         <div class="page-intro page-intro-row"><div><div class="eyebrow">CAPTURE · COMPARE · CREATE</div><h1>Camera station</h1><p class="muted">A larger stop-motion capture desk. Frame-by-frame control, onion skin and a private local workflow.</p></div><span class="camera-state" id="cameraStateBadge" aria-live="polite"><i></i> Camera off</span></div>
+        <div class="lego-beginner-guide" id="legoBeginnerGuide" hidden><span class="lego-guide-icon">🧱</span><div><strong>LEGO Brick Mode</strong><p>1. Build your scene. 2. Take a picture. 3. Move a little and take another. Turn on onion skin to see where your LEGO pieces were in the last frame.</p></div><span class="lego-step-chip">ONE FRAME AT A TIME</span></div>
         <div class="camera-layout camera-layout-expanded">
           <section class="camera-monitor panel">
             <div class="monitor-top"><div><strong>CAMERA 01 · LIVE MONITOR</strong><small id="cameraPermissionStatus">Camera is off. Turn it on when you're ready.</small></div><div class="monitor-actions"><span class="preview-pill"><i></i> CAMERA OFF</span><button type="button" class="capture-secondary" id="expandCameraBtn" aria-pressed="false">⛶ Expand view</button></div></div>
@@ -173,7 +176,7 @@
     </main>
   </div>
 
-  <dialog id="projectDialog" class="project-dialog"><form method="dialog" id="projectForm"><div class="dialog-top"><div><div class="eyebrow">NEW WORKSPACE</div><h2>Create a project</h2></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div><label>Project name<input id="projectNameInput" required maxlength="60" placeholder="e.g. Forest short film"></label><label>Cover thumbnail <input id="projectCoverInput" type="file" accept="image/*"></label><label>Project type<select id="projectTypeInput"><option>Animation</option><option>Stop motion</option><option>Game cinematics</option><option>Character study</option><option>Other</option></select></label><div class="dialog-actions"><button class="secondary-btn" value="cancel">Cancel</button><button class="primary-btn" id="saveProjectBtn" value="default">Create project</button></div></form></dialog>
+  <dialog id="projectDialog" class="project-dialog"><form method="dialog" id="projectForm"><div class="dialog-top"><div><div class="eyebrow">NEW WORKSPACE</div><h2>Create a project</h2></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div><label>Project name<input id="projectNameInput" required maxlength="60" placeholder="e.g. Forest short film"></label><label>Cover thumbnail <input id="projectCoverInput" type="file" accept="image/*"></label><label>Project type<select id="projectTypeInput"><option>Animation</option><option>Stop motion</option><option>LEGO brick animation</option><option>Game cinematics</option><option>Character study</option><option>Other</option></select></label><div class="dialog-actions"><button class="secondary-btn" value="cancel">Cancel</button><button class="primary-btn" id="saveProjectBtn" value="default">Create project</button></div></form></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
