@@ -1,0 +1,89 @@
+/* PhoenixFramez visual refresh — 2026
+   A calmer, clearer stop-motion studio with a warm ember identity.
+   This file intentionally overrides presentation only; app behavior stays in app.js. */
+:root{
+  --bg:#111315;--text:#f7f3ec;--muted:#b7b0a5;--muted-2:#8e887f;
+  --line:rgba(255,237,215,.13);--glass:rgba(255,255,255,.045);--glass-strong:rgba(255,255,255,.075);
+  --purple:#ffb36b;--blue:#f18a54;--amber:#ffd18a;--green:#9dd6ae;
+  --ember:#f28a4b;--ember-light:#ffbd76;--shadow:0 22px 60px rgba(0,0,0,.32);
+}
+body{
+ color:var(--text);
+ background:radial-gradient(ellipse at 82% 5%,rgba(178,75,34,.16),transparent 34rem),
+ radial-gradient(ellipse at 4% 70%,rgba(105,66,43,.12),transparent 32rem),
+ linear-gradient(145deg,#111315,#191816 55%,#101214);
+}
+.sidebar{
+ background:linear-gradient(165deg,rgba(34,33,30,.97),rgba(24,24,22,.96));
+ border:1px solid rgba(255,219,183,.13);border-radius:20px;padding:22px 15px;
+}
+.brand{padding-bottom:34px;gap:13px}
+.brand-mark{width:38px;height:38px;display:grid;place-items:center;filter:none}
+.brand-mark img{display:block;width:38px;height:38px}
+.brand strong{letter-spacing:1.5px;font-size:14px}
+.brand small{letter-spacing:1.7px;color:#c6a68d}
+.workspace-label,.eyebrow{color:#d5a17d;letter-spacing:1.45px}
+.nav-item{min-height:46px;border-radius:12px;color:#d2ccc2;gap:12px}
+.nav-item span{width:20px;height:20px;display:inline-grid;place-items:center;flex:0 0 20px;font-size:15px;color:#c6a28a}
+.nav-item:hover{background:rgba(255,177,112,.08);border-color:rgba(255,177,112,.13);transform:none}
+.nav-item.active{color:#fff5eb;background:linear-gradient(100deg,rgba(226,111,58,.23),rgba(226,111,58,.07));border-color:rgba(255,177,112,.22);box-shadow:inset 3px 0 #ef965e}
+.connection-card{background:rgba(255,255,255,.04);border-color:var(--line)}
+.github-link{color:#e5b18d}
+.main-content{max-width:1700px}
+.topbar{border-color:var(--line)}
+.breadcrumb strong{color:#fff1e5}
+.primary-btn{background:linear-gradient(135deg,#f2a36a,#d96c3e);border:1px solid rgba(255,224,199,.28);box-shadow:0 8px 22px rgba(174,75,36,.22);color:#21150f}
+.primary-btn:hover{box-shadow:0 12px 28px rgba(174,75,36,.3)}
+.secondary-btn{background:rgba(255,255,255,.055);border-color:rgba(255,237,215,.14);color:#f1e8dd}
+.secondary-btn:hover{background:rgba(255,177,112,.1);border-color:rgba(255,177,112,.25)}
+.hero-card{
+ background:radial-gradient(ellipse at 82% 44%,rgba(226,111,58,.22),transparent 35%),
+ linear-gradient(112deg,#29231f,#211d1a 65%,#30231c);
+ border-color:rgba(255,192,147,.2);border-radius:22px;min-height:248px;
+}
+.hero-card h2{color:#fff3e8}
+.hero-card p{color:#d4c4b6}
+.hero-btn{background:linear-gradient(135deg,#ffe2c6,#f0a46e);color:#392014;border:0}
+.hero-art{right:8%;width:250px}
+.hero-art .orbit{border-color:rgba(255,180,120,.32)}
+.hero-art .eagle-symbol{font-size:98px;filter:drop-shadow(0 12px 26px #0008)}
+.spark{color:#ffc18d;text-shadow:0 0 16px #e9874d}
+.stat-card,.panel,.integration-card{
+ background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
+ border-color:rgba(255,237,215,.11);border-radius:16px;box-shadow:inset 0 1px rgba(255,255,255,.06),0 12px 30px rgba(0,0,0,.14)
+}
+.stat-card{min-height:130px}
+.stat-icon{border-radius:9px}
+.purple,.blue{background:rgba(226,111,58,.13);color:#ffb27d}
+.amber{background:rgba(255,209,139,.12);color:#ffd18a}
+.green{background:rgba(157,214,174,.12);color:#9dd6ae}
+.section-heading h2{color:#fff0e3}
+.panel-heading h3,.stat-card strong{color:#fff3e9}
+.text-btn{color:#ffb783}
+.check-number{color:#ffd1ad;background:rgba(226,111,58,.12)}
+.step-state{color:#f0ad81}
+.pill{background:rgba(226,111,58,.13);border-color:rgba(255,177,112,.2);color:#ffd0ae}
+.notice{background:rgba(226,111,58,.07);border-color:rgba(255,177,112,.16);color:#d6c8ba}
+.notice strong{color:#ffd0ae}
+input:focus,select:focus{border-color:#e99462;box-shadow:0 0 0 3px rgba(233,148,98,.14)}
+.project-symbol{background:rgba(226,111,58,.13);color:#ffd0ae}
+.integration-logo{border-radius:11px}
+.eagle-logo{background:rgba(255,255,255,.06)}
+.app-footer{border-color:var(--line);color:#a99d91}
+.app-footer span:first-child{color:#dca17b}
+.floating-toolbar{display:none!important}
+.floating-dock{background:rgba(30,28,25,.94)!important;border-color:rgba(255,200,158,.18)!important}
+.dock-tool.active,.dock-create{background:rgba(226,111,58,.2)!important;color:#ffd0ae!important}
+.toast{background:rgba(42,34,29,.96);border-color:rgba(255,200,158,.2)}
+.project-dialog{background:linear-gradient(145deg,#302720,#1d1b19);border-color:rgba(255,200,158,.2)}
+/* Make every nav icon a consistent, legible symbol tile. */
+.nav-item span svg{width:17px;height:17px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:700px){
+ .sidebar{background:#1c1a18;border-color:rgba(255,200,158,.16)}
+ .hero-art{opacity:.24;right:-48px}
+ .hero-copy{max-width:94%}
+ .welcome-row .primary-btn{width:100%;min-height:46px}
+ .page-intro-row{align-items:start;flex-direction:column}
+ .browser-tools{align-items:stretch;flex-direction:column}
+}
+@media(prefers-reduced-transparency:reduce){.sidebar,.stat-card,.panel,.integration-card,.floating-dock{backdrop-filter:none;-webkit-backdrop-filter:none}}
