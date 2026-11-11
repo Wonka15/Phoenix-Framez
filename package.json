@@ -5,6 +5,7 @@
   "type": "module",
   "description": "A modular, browser-based stop-motion and animation production studio.",
   "scripts": {
-    "check": "find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check && node --test tests/*.test.js && node scripts/check-html.mjs"
+    "check": "find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check && node --test tests/*.test.js && node scripts/check-html.mjs",
+    "build": "npm run check && node scripts/build.mjs"
   }
 }
