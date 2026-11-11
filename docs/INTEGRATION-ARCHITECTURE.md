@@ -38,6 +38,12 @@ PhoenixFrame must remain useful when Toucan, Python or Eagle is not installed. C
 6. Open/import the supported image sequence or project data in Eagle Animation, then edit and finish the animation there.
 7. Optionally use the Python companion for local batch processing or other file-based tasks.
 
+## Master Application Controller
+
+PhoenixFrame should coordinate third-party desktop applications through optional, versioned adapters. Because GitHub Pages is static hosting, native application launch, local filesystem access and Blender scripting require a separate local bridge on the creator's computer. The bridge must be loopback-only by default, paired with a token, restricted by CORS, and expose only allowlisted adapter operations. It must not accept arbitrary shell commands or arbitrary browser-supplied scripts.
+
+Blender is the first target. Initial compatibility targets are Blender 5.3 stable and Blender 5.2 LTS. Start with read-only version, scene and timeline discovery, then add explicitly confirmed operations such as marker exchange, image-sequence import and preview rendering. Evaluate Blender 5.3's initial OpenTimelineIO support for limited timeline interchange, without assuming it represents all Blender project data. See [Master Application Controller](MASTER-APPLICATION-CONTROLLER.md).
+
 ## Delivery milestones
 
 ### Phase 1 — foundation
