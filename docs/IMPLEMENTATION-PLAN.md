@@ -35,6 +35,8 @@ Acceptance: a project survives reload, cover thumbnails render, exported JSON va
 - [x] Import still images into a local frame library.
 - [x] Local persistence for imported/captured frames.
 - [x] Previous-frame still overlay with opacity controls (previous captured/imported still; next-frame ghosting remains future work).
+- [x] Live-view / captured-exposure monitor switch.
+- [x] Grid, safe-area, aspect-mask composition guides and monitor blackout.
 - [ ] Exposure, focus, ISO and white-balance controls where the connected camera API supports them.
 - [x] Basic interval capture with configurable seconds and start/stop controls.
 - [ ] Scheduled start/end time, precision scheduling and robust capture error recovery.
@@ -45,13 +47,15 @@ Acceptance: test built-in camera and supported external camera devices on iPad S
 
 ## 4. Timeline and animation editing
 
-- [x] Frame scrubber and 24 FPS playback preview.
+- [x] Frame scrubber and playback preview at 12, 15, 24, 25 and 30 FPS.
+- [x] Frame-by-frame stepping, looping playback and last-12-frame short play.
 - [x] Add named tracks and timeline markers.
 - [x] Drag clips horizontally with pointer input.
 - [x] Reorder tracks using drag and drop.
 - [x] Persist track and marker state locally.
 - [ ] Touch-first track reordering and clip resizing handles.
 - [x] Frame-by-frame capture strip and clickable exposure-sheet view.
+- [x] Previous-exposure onion skin updates as the selected frame changes.
 - [ ] Undo/redo command history.
 - [x] Copy, paste, insert blank and delete stills in the frame library.
 - [ ] Cut, duplicate, and timeline-integrated frame editing.
@@ -148,3 +152,10 @@ No native application integration is complete until it passes the documented acc
 PhoenixFrame implements its own stop-motion workflow informed by the publicly described Dragonframe feature categories. Current working features include browser camera live view, still capture/import, ordered exposures, a selectable exposure sheet, previous-frame onion skin over live view, captured-frame monitor playback, frame stepping, configurable playback FPS, looping, short-play preview, interval capture, composition guides, monitor blackout and a local project archive.
 
 Features requiring hardware-specific APIs or larger dedicated subsystems remain planned: DSLR exposure/focus control, test-shot tray, reference-video chroma key and garbage mattes, vector drawing and motion paths, full X-sheet dialogue phonetics, multitrack waveform editing and time-warp, DMX lighting, motion-control hardware, stereoscopic capture, and final movie/GIF rendering. The generic browser camera API does not expose DSLR manual controls or guarantee precision shutter timing.
+
+
+## Dragonframe-inspired implementation scope
+
+The official Dragonframe feature overview describes animation tools, cinematography, audio, DMX lighting, motion control, image capture, X-Sheet/project management, stereoscopic 3D, time-lapse and export. PhoenixFrame now implements a stop-motion-first browser workflow for still capture/import, ordered exposures, a clickable exposure sheet, previous-frame onion skin, live/captured monitor switching, frame stepping, selectable playback rates, looping, short-play preview, composition guides, monitor blackout and basic interval capture.
+
+Not implemented yet: direct DSLR manual camera control, camera-specific test shots, vector drawing/motion paths, full rotoscoping and chroma key, full dialogue phoneme X-Sheet, multitrack audio waveform editing/time-warp, DMX lighting, motion-control hardware, stereoscopic capture and rendered movie/GIF export. These require dedicated adapters, richer project data and device/browser testing; they must not be represented as working controls before implementation.
