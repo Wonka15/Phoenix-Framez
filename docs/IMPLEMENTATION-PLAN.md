@@ -9,7 +9,7 @@ This document is the source of truth for feature status. A visual control or roa
 - [x] Responsive sidebar navigation with a mobile menu.
 - [x] Safe-area-aware touch navigation and reduced-motion/reduced-transparency fallbacks.
 - [ ] Complete iPad Safari usability pass in portrait and landscape.
-- [ ] Keyboard navigation and visible focus audit for every workspace.
+- [x] Basic animator keyboard shortcuts: Space playback, arrow-key frame stepping, C capture and Delete selected exposure.\n- [ ] Complete keyboard navigation and visible-focus audit for every workspace.
 
 Acceptance: all navigation targets work at iPad, tablet, desktop and narrow-phone widths; controls remain reachable without overlapping content.
 
