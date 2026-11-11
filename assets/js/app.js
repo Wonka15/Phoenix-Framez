@@ -671,7 +671,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       ctx.fillStyle="#ffd27e";ctx.beginPath();ctx.moveTo(x+27,y);ctx.lineTo(x+48,y+7);ctx.lineTo(x+27,y+12);ctx.fill();
       return {id:makeId("demo-frame"),projectId:project.id,src:canvas.toDataURL("image/jpeg",.88),createdAt:new Date().toISOString(),source:"PhoenixFramez demo"};
     });
-    state.projects.unshift(project);state.activeProjectId=project.id;state.frames=frames;frameSequence.replace(state.frames);state.cues=[{id:makeId("cue"),frame:1,shape:"MBP",note:"Hello!"},{id:makeId("cue"),frame:3,shape:"A / I",note:"Ah!"},{id:makeId("cue"),frame:5,shape:"Rest",note:""}];
+    state.projects.unshift(project);completeOnboardingStep("stepProject");completeOnboardingStep("stepFps");state.activeProjectId=project.id;state.frames=frames;frameSequence.replace(state.frames);state.cues=[{id:makeId("cue"),frame:1,shape:"MBP",note:"Hello!"},{id:makeId("cue"),frame:3,shape:"A / I",note:"Ah!"},{id:makeId("cue"),frame:5,shape:"Rest",note:""}];
     state.selectedFrameIndex=0;state.playbackFps=12;$("#playbackFps").value="12";$("#captureFps").value="12 FPS";$("#cameraFpsReadout").textContent="12 FPS";$("#timelineFpsLabel").textContent="12 FPS";
     storage.write(STORAGE_KEYS.projects,state.projects);storage.write(STORAGE_KEYS.cues,state.cues);renderProjects();renderCues();renderFrames();setFrame(1);renderTimeline();showView("camera");notify("Demo loaded — press Play to preview the six-frame animation.");
   }
