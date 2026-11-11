@@ -618,7 +618,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $("#exposureSheet").innerHTML = state.frames.length
       ? state.frames.map((frame, index) => renderCell(frame, index, true)).join("")
       : '<span class="muted tiny">Capture or import stills to build your exposure sheet.</span>';
-    $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
+    $$("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
     renderAnimationWorkspace();
     if (frameStoreReady) {
@@ -846,8 +846,8 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#playTimeline").addEventListener("click", () => togglePlayback());
 
   // Animation-tool controls edit per-frame overlay data, never the source still.
-  $("[data-animation-tool]").forEach(button => button.addEventListener("click", () => {
-    $("[data-animation-tool]").forEach(item => {
+  $$("[data-animation-tool]").forEach(button => button.addEventListener("click", () => {
+    $$("[data-animation-tool]").forEach(item => {
       const active = item === button;
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
