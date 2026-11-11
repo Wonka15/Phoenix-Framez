@@ -340,3 +340,18 @@ input::placeholder{color:#77839a}
   .floating-toolbar button{width:38px;height:38px}
 }
 @media(prefers-reduced-transparency:reduce){.floating-toolbar{backdrop-filter:none;-webkit-backdrop-filter:none;background:#202b45}}
+
+/* Modular studio additions: frame selection, audio preview and true onion overlay. */
+.browser-actions{display:flex;align-items:center;gap:10px}
+.audio-panel{margin-top:16px;padding:18px}
+.audio-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.audio-panel audio{display:block;width:100%;margin-top:14px;accent-color:#b9a5ff}
+.audio-status{font-size:8px;letter-spacing:1px;color:#b9a5ff}
+.frame-select{position:relative;border:2px solid transparent;background:transparent;border-radius:10px;padding:0;min-width:0;cursor:pointer}
+.frame-select.selected{border-color:#c5b5ff;box-shadow:0 0 0 2px #b9a5ff33}
+.frame-select .frame-thumb{display:block}
+.frame-edit-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.blank-frame{display:grid;place-items:center;background:repeating-linear-gradient(135deg,#202a40,#202a40 8px,#28334b 8px,#28334b 16px);color:#c7d0e4;font-size:9px;letter-spacing:1px}
+.onion-skin-image{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;pointer-events:none;mix-blend-mode:screen}
+.onion-skin-image[hidden]{display:none}
+@media(max-width:700px){.browser-actions{width:100%;justify-content:space-between}.browser-actions .secondary-btn{font-size:9px;padding:8px}.frame-edit-tools{gap:5px}}
