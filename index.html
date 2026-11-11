@@ -93,10 +93,10 @@
         <div class="lego-beginner-guide" id="legoBeginnerGuide" hidden><span class="lego-guide-icon">🧱</span><div><strong>LEGO Brick Mode</strong><p>1. Build your scene. 2. Take a picture. 3. Move a little and take another. Turn on onion skin to see where your LEGO pieces were in the last frame.</p></div><span class="lego-step-chip">ONE FRAME AT A TIME</span></div>
         <div class="camera-layout camera-layout-expanded">
           <section class="camera-monitor panel">
-            <div class="monitor-top"><div><strong>CAMERA 01 · LIVE MONITOR</strong><small id="cameraPermissionStatus">Camera is off. Turn it on when you're ready.</small></div><div class="monitor-actions"><span class="preview-pill"><i></i> CAMERA OFF</span><button type="button" class="capture-secondary" id="expandCameraBtn" aria-pressed="false">⛶ Expand view</button></div></div>
+            <div class="monitor-top"><div><strong>CAMERA 01 · LIVE MONITOR</strong><small id="cameraPermissionStatus">Camera is off. Turn it on when you're ready.</small></div><div class="monitor-actions"><span class="preview-pill"><i></i> STANDBY</span><button type="button" class="capture-secondary" id="expandCameraBtn" aria-pressed="false">⛶ Expand view</button></div></div>
             <div class="camera-viewfinder" id="cameraViewfinder">
               <div class="viewfinder-grid"></div><div class="focus-reticle">＋</div>
-              <div class="viewfinder-center"><span class="camera-aperture">◉</span><strong>Camera is off</strong><small>Turn on your camera to request browser permission and start the live preview.</small></div>
+              <div class="viewfinder-center"><span class="camera-aperture">◉</span><strong>Ready to capture</strong><small>Turn on the camera to start the live preview, or import still images into your frame library.</small></div>
               <div class="viewfinder-meta"><span id="captureFrameReadout">FRAME 001</span><span id="cameraFpsReadout">24 FPS</span><span id="cameraAspectReadout">16:9</span></div>
             </div>
             <div class="monitor-mode-controls"><button type="button" class="secondary-btn active" id="liveViewModeBtn">Live camera</button><button type="button" class="secondary-btn" id="animationViewModeBtn">Selected frame</button></div>
@@ -104,7 +104,7 @@
                 <span class="power-switch-labels"><span class="power-off-label">OFF</span><span class="power-on-label">ON</span></span>
                 <span class="power-switch-track"><span class="power-switch-knob"><span class="power-symbol">⏻</span></span></span>
                 <span class="power-switch-caption">CAMERA POWER</span>
-              </button><button class="shutter-btn" id="shutterBtn" aria-label="Capture frame"><span></span></button><button class="capture-secondary" id="cameraImportBtn" type="button">Import image</button><input type="file" id="cameraFileInput" accept="image/*" hidden></div>
+              </button><button class="shutter-btn" id="shutterBtn" type="button" aria-label="Capture frame" title="Capture one still frame from the live camera"><span></span></button><button class="capture-secondary" id="cameraImportBtn" type="button">Import image</button><input type="file" id="cameraFileInput" accept="image/*" hidden></div>
             <div class="camera-privacy-note" role="note"><span class="privacy-lock">▣</span><div><strong>Your camera stays under your control</strong><p>Camera access starts only after you tap “Turn camera on” and approve your browser's permission prompt. PhoenixFramez uses the camera locally in this browser, with audio disabled. The camera station does not upload or stream your camera feed to PhoenixFramez servers. Captured frames are saved in this browser's local project storage; exporting or sharing a project is your choice. Turn the camera off at any time to stop the camera tracks.</p><small id="cameraPrivacyStatus" aria-live="polite">No camera permission has been requested by this session.</small></div></div>
           </section>
           <aside class="camera-side">
