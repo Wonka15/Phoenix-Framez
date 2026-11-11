@@ -518,7 +518,9 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       video.muted = true;
       video.playsInline = true;
       video.srcObject = pendingStream;
-      await video.play();
+      // Some iPad/iPhone browsers reject play() after the permission prompt consumes
+      // the original tap activation. Keep the stream and wait for decoded video instead.
+      try { await video.play(); } catch (playError) { console.warn('[PhoenixFramez] Preview play() deferred by browser:', playError); }
       // Do not report the camera as ready until an actual decoded frame is available.
       if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
         await new Promise((resolve, reject) => {
@@ -987,9 +989,14 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     cameraPowerControl.classList.remove("is-dragging");
     const knob = cameraPowerControl.querySelector(".power-switch-knob");
     if (knob) knob.style.left = "";
-    if (!moved) return; // A normal tap is handled by the click listener below.
+    // Handle taps here as well as drags: iOS embedded browsers can occasionally
+    // swallow the synthetic click after pointer capture or a permission transition.
     ignoreCameraSwitchClick = true;
     window.setTimeout(() => { ignoreCameraSwitchClick = false; }, 0);
+    if (!moved) {
+      state.cameraStream ? disconnectCamera() : connectCamera();
+      return;
+    }
     const wantsOn = delta > 0;
     if (wantsOn && !state.cameraStream) connectCamera();
     else if (!wantsOn && state.cameraStream) disconnectCamera();
