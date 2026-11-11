@@ -7,6 +7,7 @@ PhoenixFrame is an independent, browser-based production companion for stop-moti
 - **PhoenixFrame:** production planning, scenes, shots, takes, timing, frame organization and interchange.
 - **Eagle Animation:** animation editing, playback and finishing.
 - **Toucan Camera Server:** optional camera connection through its local API.
+- **Master Application Controller:** coordinates supported desktop tools through optional, secure local adapters; Blender is the first target.
 - **Python companion:** optional local image processing and production automation.
 
 The PhoenixFrame website is intended to run as static HTML, CSS and JavaScript on GitHub Pages. Toucan and Python are separate optional local services; GitHub Pages does not run those services.
@@ -45,6 +46,10 @@ The workflow in `.github/workflows/pages.yml` deploys the site when changes are 
 5. Add an optional Python companion for local image processing and production automation.
 6. Evaluate Blender and Godot integrations.
 7. Add automated tests and publish compatibility notes.
+
+## Master Application Controller
+
+PhoenixFrame is intended to act as the production hub for supported third-party applications. The GitHub Pages site cannot directly launch or control native desktop applications; that requires an optional local bridge running on the creator's computer. The bridge will use paired, allowlisted adapters rather than arbitrary shell or script execution. Blender is the first planned adapter. See [Master Application Controller](docs/MASTER-APPLICATION-CONTROLLER.md) for the design, security boundaries, Blender version targets and implementation milestones.
 
 ## Integration and licensing boundaries
 
