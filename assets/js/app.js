@@ -11,6 +11,7 @@ import { createFrameSequence } from "./animation/frame-sequence.js";
 import { createAudioEngine } from "./audio/audio-engine.js";
 import { buildProjectArchive, validateProjectArchive, downloadJson } from "./export/project-archive.js";
 import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from "./animation/stop-motion.js";
+import { createAnimationTools, normalizeFrameEdits } from "./animation/animation-tools.js";
 
 /**
  * PhoenixFrame 1.0 — browser studio controller
@@ -27,7 +28,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   "use strict";
 
   // ---------- Application state ----------
-  const STORAGE_KEYS = { projects: "phoenixframe.projects", cues: "phoenixframe.cues", timeline: "phoenixframe.timeline", frames: "phoenixframe.frames" };
+  const STORAGE_KEYS = { projects: "phoenixframe.projects", cues: "phoenixframe.cues", timeline: "phoenixframe.timeline", frames: "phoenixframe.frames", animationEdits: "phoenixframe.animationEdits" };
   const storage = createStorage((error, operation) => {
     console.warn("[PhoenixFrame] Storage " + operation + " failed:", error);
     if (operation === "write") window.setTimeout(() => notify("Browser storage is full or unavailable. Export your project data."), 0);
@@ -37,10 +38,12 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   const storedProjects = storage.read(STORAGE_KEYS.projects, []);
   const storedCues = storage.read(STORAGE_KEYS.cues, []);
   const storedFrames = storage.read(STORAGE_KEYS.frames, []);
+  const storedAnimationEdits = storage.read(STORAGE_KEYS.animationEdits, {});
   const state = {
     projects: Array.isArray(storedProjects) ? storedProjects : [],
     cues: Array.isArray(storedCues) ? storedCues : [],
     frames: Array.isArray(storedFrames) ? storedFrames : [],
+    animationEdits: storedAnimationEdits && typeof storedAnimationEdits === "object" && !Array.isArray(storedAnimationEdits) ? storedAnimationEdits : {},
     markers: savedTimeline.markers,
     tracks: savedTimeline.tracks,
     frame: 1,
@@ -76,6 +79,51 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   $("#cameraViewfinder").insertBefore(animationPreview, $(".viewfinder-meta"));
   const frameSequence = createFrameSequence(state.frames);
   const audioEngine = createAudioEngine($("#audioPreview"));
+  const annotationCanvas = $("#annotationCanvas");
+  const animationTools = createAnimationTools(annotationCanvas, {
+    getEdit: () => getCurrentFrameEdit(),
+    onChange: edit => {
+      state.animationEdits[getCurrentFrameKey()] = normalizeFrameEdits(edit);
+      persistAnimationEdits();
+      renderAnimationWorkspace();
+    }
+  });
+  let referenceLoadToken = 0;
+
+  function getCurrentFrameKey() {
+    const frame = state.frames[state.selectedFrameIndex];
+    return frame ? String(frame.id || "frame-" + state.selectedFrameIndex) : "frame-empty";
+  }
+
+  function getCurrentFrameEdit() {
+    return normalizeFrameEdits(state.animationEdits[getCurrentFrameKey()] || {});
+  }
+
+  function persistAnimationEdits() {
+    storage.write(STORAGE_KEYS.animationEdits, state.animationEdits);
+  }
+
+  function renderAnimationWorkspace() {
+    const frame = state.frames[state.selectedFrameIndex];
+    const edit = getCurrentFrameEdit();
+    const currentImage = $("#toolsFrameImage");
+    const previousImage = $("#toolsPreviousImage");
+    const referenceImage = $("#toolsReferenceImage");
+    const hasFrame = Boolean(frame?.src);
+    currentImage.hidden = !hasFrame;
+    $("#animationStageEmpty").hidden = hasFrame;
+    if (hasFrame && currentImage.src !== frame.src) currentImage.src = frame.src;
+    const previous = state.frames[state.selectedFrameIndex - 1];
+    previousImage.hidden = !previous?.src || !$("#differenceModeToggle").checked;
+    if (previous?.src && previousImage.src !== previous.src) previousImage.src = previous.src;
+    referenceImage.hidden = !edit.reference;
+    if (edit.reference && referenceImage.src !== edit.reference) referenceImage.src = edit.reference;
+    referenceImage.style.opacity = String(edit.referenceOpacity);
+    $("#toolsFrameLabel").textContent = "FRAME " + String(state.frame).padStart(3, "0");
+    $("#annotationStatus").textContent = "Drawing layer · Frame " + String(state.frame).padStart(3, "0");
+    $("#differenceModeToggle").disabled = !previous?.src;
+    animationTools.render(edit);
+  }
 
   function persistTimeline() {
     storage.write(STORAGE_KEYS.timeline, {
@@ -191,6 +239,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     if (selected?.src) { animationPreview.src = selected.src; animationPreview.hidden = false; }
     else { animationPreview.removeAttribute("src"); animationPreview.hidden = true; }
     syncFrameSelection();
+    renderAnimationWorkspace();
   }
 
   function stopPlayback() {
@@ -402,6 +451,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
       : '<span class="muted tiny">Capture or import stills to build your exposure sheet.</span>';
     $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
+    renderAnimationWorkspace();
     storage.write(STORAGE_KEYS.frames, state.frames);
     $("#frameScrubber").max = state.frames.length || 120;
   }
@@ -531,6 +581,76 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     setFrame(event.target.value);
   });
   $("#playTimeline").addEventListener("click", () => togglePlayback());
+
+  // Animation-tool controls edit per-frame overlay data, never the source still.
+  $("[data-animation-tool]").forEach(button => button.addEventListener("click", () => {
+    $("[data-animation-tool]").forEach(item => {
+      const active = item === button;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    animationTools.setTool(button.dataset.animationTool);
+  }));
+  $("#annotationColor").addEventListener("input", event => animationTools.setColor(event.target.value));
+  $("#annotationWidth").addEventListener("input", event => {
+    animationTools.setWidth(event.target.value);
+    $("#brushSizeValue").textContent = event.target.value + " px";
+  });
+  $("#undoAnnotationBtn").addEventListener("click", () => animationTools.undo());
+  $("#clearAnnotationBtn").addEventListener("click", () => {
+    if (!window.confirm("Clear drawings and motion guides on this frame?")) return;
+    animationTools.clear();
+  });
+  $("#clearMotionPathBtn").addEventListener("click", () => {
+    const edit = getCurrentFrameEdit();
+    edit.motionPath = [];
+    state.animationEdits[getCurrentFrameKey()] = edit;
+    persistAnimationEdits();
+    animationTools.render(edit);
+  });
+  $("#differenceModeToggle").addEventListener("change", renderAnimationWorkspace);
+  $("#referenceOpacity").addEventListener("input", event => {
+    const edit = getCurrentFrameEdit();
+    edit.referenceOpacity = Number(event.target.value) / 100;
+    state.animationEdits[getCurrentFrameKey()] = edit;
+    persistAnimationEdits();
+    renderAnimationWorkspace();
+  });
+  $("#referenceImageChoose").addEventListener("click", () => $("#referenceImageInput").click());
+  $("#referenceImageInput").addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const token = ++referenceLoadToken;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+      const referenceCanvas = document.createElement("canvas");
+      referenceCanvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      referenceCanvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      referenceCanvas.getContext("2d").drawImage(bitmap, 0, 0, referenceCanvas.width, referenceCanvas.height);
+      bitmap.close?.();
+      if (token !== referenceLoadToken) return;
+      const edit = getCurrentFrameEdit();
+      edit.reference = referenceCanvas.toDataURL("image/png");
+      edit.referenceOpacity = Number($("#referenceOpacity").value) / 100;
+      state.animationEdits[getCurrentFrameKey()] = edit;
+      persistAnimationEdits();
+      renderAnimationWorkspace();
+      notify("Reference overlay added to this frame.");
+    } catch (error) {
+      console.warn("[PhoenixFrame] Reference image could not be loaded:", error);
+      notify("Could not load that reference image.");
+    } finally {
+      event.target.value = "";
+    }
+  });
+  $("#removeReferenceBtn").addEventListener("click", () => {
+    const edit = getCurrentFrameEdit();
+    edit.reference = "";
+    state.animationEdits[getCurrentFrameKey()] = edit;
+    persistAnimationEdits();
+    renderAnimationWorkspace();
+  });
   $("#liveViewModeBtn").addEventListener("click", () => setMonitorMode("live"));
   $("#animationViewModeBtn").addEventListener("click", () => setMonitorMode("animation"));
   $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.max(1, state.frame - 1)); });
@@ -640,6 +760,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     stopPlayback();
     state.cameraStream?.getTracks().forEach(track => track.stop());
     audioEngine.dispose();
+    animationTools.dispose();
     window.clearInterval(state.intervalTimer);
   });
 
@@ -649,4 +770,5 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   renderTimeline();
   renderFrames();
   setFrame(1);
+  renderAnimationWorkspace();
 })();
