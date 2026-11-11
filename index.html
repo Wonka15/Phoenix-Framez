@@ -54,27 +54,34 @@
       </header>
 
       <section class="view active-view" id="overviewView">
-        <div class="welcome-row">
-          <div><div class="eyebrow">YOUR CREATIVE WORKSPACE</div><h1>Your studio, ready.</h1><p class="muted">Plan your stop-motion film, capture frames, shape your timing, and keep every production asset together.</p></div>
-          <div class="welcome-actions"><button class="secondary-btn" id="loadDemoBtn">▶ Load demo project</button><button class="primary-btn" id="newProjectBtn">＋ New project</button></div>
+        <div class="home-welcome">
+          <div><div class="eyebrow">PHOENIXFRAMEZ WORKSPACE</div><h1>What are we making today?</h1><p class="muted">Choose a starting point. Your projects and frames stay organized in this browser.</p></div>
+          <button class="primary-btn" id="newProjectBtn">＋ New project</button>
         </div>
-        <div class="hero-card">
-          <div class="hero-copy"><span class="pill">ANIMATION PRODUCTION STUDIO</span><h2>Make every frame<br>count.</h2><p>Organize scenes and shots, prepare frame sequences, and move your production between your favorite animation tools.</p><button class="hero-btn" data-go="timeline">Start editing <span>→</span></button></div>
-          <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><img class="phoenix-emblem-hero" src="assets/phoenix-emblem.svg" alt="PhoenixFramez phoenix emblem"><div class="spark spark-one">✦</div><div class="spark spark-two">✧</div></div>
+        <div class="home-quick-start">
+          <button type="button" class="home-action-card home-action-brick" id="startLegoModeBtn">
+            <span class="home-action-icon" aria-hidden="true">🧱</span><span class="home-action-copy"><strong>LEGO Brick Mode</strong><small>Simple stop motion for LEGO builds. Big capture controls and onion skin.</small><em>Start a brick animation →</em></span>
+          </button>
+          <button type="button" class="home-action-card" id="homeCaptureBtn">
+            <span class="home-action-icon" aria-hidden="true">◎</span><span class="home-action-copy"><strong>Capture frames</strong><small>Open the camera station and start shooting one frame at a time.</small><em>Open camera station →</em></span>
+          </button>
+          <button type="button" class="home-action-card" id="homeProjectsBtn">
+            <span class="home-action-icon" aria-hidden="true">▦</span><span class="home-action-copy"><strong>Browse projects</strong><small>Find a production, reopen a project, or export your frames.</small><em>View project library →</em></span>
+          </button>
         </div>
-        <div class="section-heading"><div><div class="eyebrow">AT A GLANCE</div><h2>Studio overview</h2></div><span class="muted tiny">Your browser workspace</span></div>
-        <div class="stats-grid">
-          <article class="stat-card"><span class="stat-icon purple">▣</span><span class="stat-label">Projects</span><strong id="projectCount">0</strong><small>Created in this browser</small></article>
-          <article class="stat-card"><span class="stat-icon blue">◷</span><span class="stat-label">Timeline</span><strong>24 FPS</strong><small>Default playback rate</small></article>
-          <article class="stat-card"><span class="stat-icon amber">◖</span><span class="stat-label">Lip-sync cues</span><strong id="cueCount">0</strong><small>Across this session</small></article>
-          <article class="stat-card"><span class="stat-icon green">⌘</span><span class="stat-label">Integrations</span><strong>2</strong><small>Blender + Godot planned</small></article>
-        </div>
-        <div class="lower-grid">
-          <section class="panel project-panel"><div class="panel-heading"><div><h3>Recent projects</h3><p class="muted">Pick up where you left off.</p></div><button class="text-btn" id="addProjectLink">＋ Add</button></div><div id="projectList" class="empty-state"><div class="empty-icon">▱</div><strong>No projects yet</strong><p>Create a project to start organizing your scenes and animation work.</p><button class="secondary-btn" id="emptyCreateBtn">Create your first project</button></div></section>
-          <section class="panel activity-panel"><div class="panel-heading"><div><h3>Getting started</h3><p class="muted">A few steps to set up your studio.</p></div></div><div class="check-list"><div><span class="check-number">01</span><p><strong>Create a project</strong><small>Give your production a home.</small></p><label class="step-state"><input type="checkbox" id="stepProject"> DONE</label></div><div><span class="check-number">02</span><p><strong>Set your frame rate</strong><small>Choose a timing standard.</small></p><label class="step-state"><input type="checkbox" id="stepFps"> DONE</label></div><div><span class="check-number">03</span><p><strong>Explore integrations</strong><small>Connect your creative workflow.</small></p><label class="step-state"><input type="checkbox" id="stepIntegration"> DONE</label></div></div></section>
-        </div>
+        <div class="home-section-heading"><div><div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div><h2>Recent projects</h2></div><button class="text-btn" id="addProjectLink">＋ New project</button></div>
+        <section class="panel project-panel home-recent-panel"><div id="projectList" class="empty-state"><div class="empty-icon">▱</div><strong>No projects yet</strong><p>Create a project or start with LEGO Brick Mode. Your work will appear here.</p><button class="secondary-btn" id="emptyCreateBtn">Create your first project</button></div></section>
+        <details class="home-setup">
+          <summary>Studio setup and session details</summary>
+          <div class="home-session-stats">
+            <div><strong id="projectCount">0</strong><span>Projects in this browser</span></div>
+            <div><strong id="cueCount">0</strong><span>Lip-sync cues</span></div>
+            <div><strong>24 FPS</strong><span>Default playback rate</span></div>
+            <div><strong>2</strong><span>Planned integrations</span></div>
+          </div>
+          <div class="check-list"><div><span class="check-number">01</span><p><strong>Create a project</strong><small>Give your production a home.</small></p><label class="step-state"><input type="checkbox" id="stepProject"> DONE</label></div><div><span class="check-number">02</span><p><strong>Set your frame rate</strong><small>Choose a timing standard.</small></p><label class="step-state"><input type="checkbox" id="stepFps"> DONE</label></div><div><span class="check-number">03</span><p><strong>Explore integrations</strong><small>Connect your creative workflow.</small></p><label class="step-state"><input type="checkbox" id="stepIntegration"> DONE</label></div></div>
+        </details>
       </section>
-
       <section class="view" id="projectsView">
         <div class="page-intro page-intro-row"><div><div class="eyebrow">YOUR PRODUCTIONS</div><h1>Project browser</h1><p class="muted">A visual home for every film, sequence and creative experiment.</p></div><button class="primary-btn" id="browserNewProject">＋ New project</button></div>
         <div class="browser-tools"><div class="search-wrap"><span>⌕</span><input id="projectSearch" type="search" placeholder="Find a project…" aria-label="Find a project"></div><div class="browser-actions"><button class="secondary-btn" id="importProjectBtn">Import project</button><input type="file" id="projectArchiveInput" accept=".json,application/json" hidden><div class="view-toggle"><button class="view-toggle-btn active" data-project-layout="grid">▦ Grid</button><button class="view-toggle-btn" data-project-layout="list">☷ List</button></div></div></div>
