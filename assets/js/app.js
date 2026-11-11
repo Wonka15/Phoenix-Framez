@@ -149,7 +149,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $$(".dock-tool[data-dock-view]").forEach(button => button.classList.toggle("active", button.dataset.dockView === name));
 
     const labels = { overview: "Overview", lipsync: "Lip Sync", camera: "Camera station", projects: "Projects", "animation-tools": "Animation tools" };
-    $("#pageName").textContent = labels[name] || name[0].toUpperCase() + name.slice(1);
+    $("#pageName").textContent = name === "camera" && $("#cameraView").classList.contains("lego-mode") ? "LEGO Brick Mode" : (labels[name] || name[0].toUpperCase() + name.slice(1));
     $("#sidebar").classList.remove("open");
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (name === "animation-tools") window.requestAnimationFrame(() => animationTools.render(getCurrentFrameEdit()));
