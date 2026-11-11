@@ -166,6 +166,12 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     else notify("Project creation requires a modern browser.");
   }
 
+  function openLegoProjectDialog() {
+    openProjectDialog();
+    $("#projectNameInput").value = "My LEGO Animation";
+    $("#projectTypeInput").value = "LEGO brick animation";
+  }
+
   function createProjectCard(project, index) {
     const palette = ["thumb-violet", "thumb-blue", "thumb-amber", "thumb-rose"];
     const coverStyle = project.cover
@@ -779,12 +785,16 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   ["#newProjectBtn", "#addProjectLink", "#browserNewProject"].forEach(selector => {
     $(selector)?.addEventListener("click", openProjectDialog);
   });
+  $("#startLegoModeBtn").addEventListener("click", openLegoProjectDialog);
+  $("#homeCaptureBtn").addEventListener("click", () => { setLegoMode(false); showView("camera"); });
+  $("#homeProjectsBtn").addEventListener("click", () => showView("projects"));
 
   $("#projectForm").addEventListener("submit", async event => {
     if (event.submitter?.value === "cancel") return;
     event.preventDefault();
     const name = $("#projectNameInput").value.trim();
     if (!name) return;
+    const projectType = $("#projectTypeInput").value;
     const saveButton = $("#saveProjectBtn");
     saveButton.disabled = true;
     let cover = "";
@@ -795,14 +805,18 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       console.warn("[PhoenixFrame] Project thumbnail could not be processed:", error);
       notify("The project will be created without a cover thumbnail.");
     }
-    state.projects.unshift(createProject({ name, type: $("#projectTypeInput").value, cover }));
+    state.projects.unshift(createProject({ name, type: projectType, cover }));
     completeOnboardingStep("stepProject");
     storage.write(STORAGE_KEYS.projects, state.projects);
     renderProjects();
     dialog.close();
-    showView("projects");
     saveButton.disabled = false;
-    notify("Project created.");
+    if (/lego/i.test(projectType)) {
+      openProject(0);
+    } else {
+      showView("projects");
+      notify("Project created.");
+    }
   });
 
   $("#projectSearch").addEventListener("input", renderProjectBrowser);
