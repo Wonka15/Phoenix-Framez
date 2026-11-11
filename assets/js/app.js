@@ -52,6 +52,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     projectLayout: "grid",
     cameraStream: null,
     activeProjectId: null,
+    selectedExportProjectId: null,
     selectedFrameIndex: -1,
     playbackFps: 24,
     loopPlayback: true,
@@ -175,7 +176,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
         <h3>${escapeHTML(project.name)}</h3>
         <p>${escapeHTML(project.type)} · ${escapeHTML(project.date || "New production")}</p>
         <div class="project-card-foot"><small>LOCAL PROJECT</small>
-          <button type="button" data-open-project="${index}">Open project ↗</button>
+          <div class="project-card-actions"><button type="button" data-open-project="${index}">Open project</button><button type="button" data-export-project="${index}" aria-label="Export ${escapeHTML(project.name)}">Export ↓</button></div>
         </div>
       </div>
     </article>`;
@@ -216,6 +217,57 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
 
     browser.innerHTML = matches.map(item => createProjectCard(item.project, item.index)).join("");
     $$("[data-open-project]").forEach(button => button.addEventListener("click", () => openProject(+button.dataset.openProject)));
+    $$("[data-export-project]").forEach(button => button.addEventListener("click", () => openProjectExport(+button.dataset.exportProject)));
+  }
+
+  function setLegoMode(enabled) {
+    const active = Boolean(enabled);
+    $("#cameraView").classList.toggle("lego-mode", active);
+    $("#legoBeginnerGuide").hidden = !active;
+    if (active) {
+      $("#pageName").textContent = "LEGO Brick Mode";
+      $("#cameraPermissionStatus").textContent = "Build your scene, turn on the camera, then capture one frame at a time.";
+    }
+  }
+
+  function openProjectExport(index) {
+    const project = state.projects[index];
+    if (!project) return;
+    state.selectedExportProjectId = project.id;
+    $("#projectExportTitle").textContent = "Export: " + project.name;
+    $("#projectExportDescription").textContent = "Save your " + project.type.toLowerCase() + " project or download its captured images.";
+    $("#projectExportPanel").hidden = false;
+    showView("projects");
+    $("#projectExportPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function getExportFrames(project) {
+    return state.frames.filter(frame => frame.projectId === project.id || (!frame.projectId && state.activeProjectId === project.id));
+  }
+
+  function exportSelectedProjectArchive() {
+    const project = state.projects.find(item => item.id === state.selectedExportProjectId);
+    if (!project) return notify("Choose a project to export first.");
+    const frames = getExportFrames(project);
+    const payload = buildProjectArchive({ ...state, projects: [project], frames });
+    downloadJson(payload, project.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-phoenixframez.json");
+    notify("Project file downloaded.");
+  }
+
+  function exportSelectedProjectFrames() {
+    const project = state.projects.find(item => item.id === state.selectedExportProjectId);
+    if (!project) return notify("Choose a project to export first.");
+    const frames = getExportFrames(project).filter(frame => frame.src && !frame.blank);
+    if (!frames.length) return notify("This project has no captured images yet.");
+    frames.forEach((frame, index) => {
+      window.setTimeout(() => {
+        const link = document.createElement("a");
+        link.href = frame.src;
+        link.download = project.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-frame-" + String(index + 1).padStart(4, "0") + ".jpg";
+        link.click();
+      }, index * 180);
+    });
+    notify("Downloading " + frames.length + " frame images.");
   }
 
   function openProject(index) {
@@ -223,8 +275,15 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     if (!project) return;
     state.activeProjectId = project.id;
     $("#timelineProjectName").textContent = project.name;
-    showView("timeline");
-    notify("Workspace opened: " + project.name);
+    if (/lego/i.test(project.type)) {
+      setLegoMode(true);
+      showView("camera");
+      notify("LEGO Brick Mode ready. Capture your first frame!");
+    } else {
+      setLegoMode(false);
+      showView("timeline");
+      notify("Workspace opened: " + project.name);
+    }
   }
 
   // ---------- Timeline model and rendering ----------
@@ -529,7 +588,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    state.frames.push({ id: makeId("frame"), src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
+    state.frames.push({ id: makeId("frame"), projectId: state.activeProjectId, src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString() });
     setFrame(state.frames.length);
     renderFrames();
     setMonitorMode("live");
@@ -547,7 +606,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
         canvas.height = Math.max(1, Math.round(bitmap.height * scale));
         canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         bitmap.close?.();
-        state.frames.push({ id: makeId("frame"), src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString(), source: file.name });
+        state.frames.push({ id: makeId("frame"), projectId: state.activeProjectId, src: canvas.toDataURL("image/jpeg", 0.86), createdAt: new Date().toISOString(), source: file.name });
       } catch (error) {
         console.warn("[PhoenixFrame] Skipped an unreadable image:", error);
       }
@@ -620,6 +679,9 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   });
 
   $("#projectSearch").addEventListener("input", renderProjectBrowser);
+  $("#closeProjectExportBtn").addEventListener("click", () => { $("#projectExportPanel").hidden = true; });
+  $("#exportSelectedArchiveBtn").addEventListener("click", exportSelectedProjectArchive);
+  $("#exportSelectedFramesBtn").addEventListener("click", exportSelectedProjectFrames);
   $$(".view-toggle-btn").forEach(button => button.addEventListener("click", () => {
     $$(".view-toggle-btn").forEach(item => item.classList.toggle("active", item === button));
     state.projectLayout = button.dataset.projectLayout;
