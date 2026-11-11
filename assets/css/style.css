@@ -317,3 +317,26 @@ input::placeholder{color:#77839a}
 .recent-project-list{min-height:120px}
 @media(max-width:900px) and (min-width:701px){.sidebar{width:210px}.main-content{margin-left:235px;padding-right:20px}.camera-layout{grid-template-columns:1fr}.camera-side{grid-template-columns:1fr 1fr}}
 @media(orientation:landscape) and (max-height:600px){.floating-dock{bottom:8px}.sidebar{inset:8px auto 8px 8px}.main-content{padding-bottom:68px}}
+
+
+/* Studio toolbar: a compact floating glass action rail, separate from navigation. */
+.floating-toolbar{
+  position:fixed;z-index:24;right:28px;top:88px;display:flex;gap:7px;padding:7px;
+  border:1px solid rgba(255,255,255,.22);border-radius:17px;
+  background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.065));
+  box-shadow:0 14px 42px #0005,inset 0 1px rgba(255,255,255,.28);
+  backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);
+}
+.floating-toolbar button{width:36px;height:36px;border:1px solid transparent;border-radius:11px;background:transparent;color:#e7eaff;font-size:17px}
+.floating-toolbar button:hover{background:#ffffff18;border-color:#ffffff25}
+.track-grip{color:#9ca9c0;margin-right:8px;cursor:grab}
+.track-row[draggable=true]{cursor:grab}
+.track-row.track-dragging{opacity:.45}
+.track-row.track-drop-target .track-name{background:#b9a5ff20}
+.clip{border:1px solid #ffffff55;color:#fff;text-align:left}
+.camera-viewfinder.has-camera .viewfinder-center{display:none}
+@media(max-width:700px){
+  .floating-toolbar{top:auto;right:12px;bottom:78px;padding:5px;gap:3px;border-radius:14px}
+  .floating-toolbar button{width:38px;height:38px}
+}
+@media(prefers-reduced-transparency:reduce){.floating-toolbar{backdrop-filter:none;-webkit-backdrop-filter:none;background:#202b45}}
