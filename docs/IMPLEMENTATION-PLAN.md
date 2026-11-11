@@ -52,7 +52,8 @@ Acceptance: test built-in camera and supported external camera devices on iPad S
 - [ ] Touch-first track reordering and clip resizing handles.
 - [ ] Frame-by-frame capture strip and exposure-sheet view.
 - [ ] Undo/redo command history.
-- [x] Copy, paste, insert blank and delete stills in the frame library.\n- [ ] Cut, duplicate, and timeline-integrated frame editing.
+- [x] Copy, paste, insert blank and delete stills in the frame library.
+- [ ] Cut, duplicate, and timeline-integrated frame editing.
 - [ ] Multi-select and ripple editing.
 - [ ] Audio waveform tracks and synchronized playback.
 - [ ] Timeline zoom, pan, snapping and frame-range controls.
@@ -61,7 +62,7 @@ Acceptance: all edits are frame-accurate, survive reload, are undoable, and work
 
 ## 5. Drawing, compositing and effects
 
-- [ ] Onion-skin animation guides over the actual previous/next captured frames.
+- [x] Previous captured still can be overlaid in the camera monitor with adjustable opacity.\n- [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
 - [ ] Drawing tools with layers and non-destructive edits.
 - [ ] Text cards and speech bubbles.
 - [ ] Rotoscoping over imported video.
@@ -74,7 +75,8 @@ These are substantial editing features. They should be implemented as independen
 
 ## 6. Sound and finishing
 
-- [x] Import and preview a local voiceover/reference audio file.\n- [ ] Voiceover and narration recording with explicit microphone permission.
+- [x] Import and preview a local voiceover/reference audio file.
+- [ ] Voiceover and narration recording with explicit microphone permission.
 - [ ] Import audio and add sound-effect / music tracks.
 - [ ] Waveform display and frame-accurate audio alignment.
 - [ ] Audio levels, fades and mixdown.
@@ -113,7 +115,19 @@ The static GitHub Pages site cannot itself provide unrestricted local filesystem
 
 No native application integration is complete until it passes the documented acceptance tests in `MASTER-APPLICATION-CONTROLLER.md`.
 
-## Modular code structure\n\n- `assets/js/core/`: shared DOM and local-storage helpers.\n- `assets/js/projects/`: project creation and cover-thumbnail processing.\n- `assets/js/timeline/`: pure timeline data model and frame-range rules.\n- `assets/js/camera/`: camera monitor onion-skin overlay.\n- `assets/js/animation/`: still-frame sequence operations.\n- `assets/js/audio/`: local audio preview and object-URL lifecycle.\n- `assets/js/export/`: versioned archive creation, validation and download.\n- `assets/js/app.js`: browser entry point, workspace rendering and event orchestration.\n- `tests/`: Node built-in unit tests for data operations.\n\n## Code quality rules
+## Modular code structure
+
+- `assets/js/core/`: shared DOM and local-storage helpers.
+- `assets/js/projects/`: project creation and cover-thumbnail processing.
+- `assets/js/timeline/`: pure timeline data model and frame-range rules.
+- `assets/js/camera/`: camera monitor onion-skin overlay.
+- `assets/js/animation/`: still-frame sequence operations.
+- `assets/js/audio/`: local audio preview and object-URL lifecycle.
+- `assets/js/export/`: versioned archive creation, validation and download.
+- `assets/js/app.js`: browser entry point, workspace rendering and event orchestration.
+- `tests/`: Node built-in unit tests for data operations.
+
+## Code quality rules
 
 1. Keep HTML semantic and keep behavior out of inline event attributes.
 2. Keep CSS grouped by design tokens, shared components, workspace components and responsive/accessibility overrides.
