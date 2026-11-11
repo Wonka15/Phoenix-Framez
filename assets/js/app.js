@@ -1,4 +1,17 @@
 /**
+ * PhoenixFrame application entry point.
+ * Feature behavior is delegated to small domain modules under this directory.
+ */
+import { $, $$, escapeHTML, makeId } from "./core/dom.js";
+import { createStorage } from "./core/storage.js";
+import { makeCoverThumbnail, createProject } from "./projects/project-store.js";
+import { DEFAULT_TRACKS, normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "./timeline/timeline-model.js";
+import { createOnionSkin } from "./camera/onion-skin.js";
+import { createFrameSequence } from "./animation/frame-sequence.js";
+import { createAudioEngine } from "./audio/audio-engine.js";
+import { buildProjectArchive, validateProjectArchive, downloadJson } from "./export/project-archive.js";
+
+/**
  * PhoenixFrame 1.0 — browser studio controller
  * ------------------------------------------------------------
  * This file deliberately keeps the first alpha dependency-free:
@@ -77,18 +90,7 @@
     toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2600);
   }
 
-  // Escape user-entered text before inserting it into HTML templates.
-  function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, character => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    })[character]);
-  }
-
-  function makeId(prefix = "item") {
-    return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
-  }
-
-  function persistTimeline() {
+  const onionSkin = createOnionSkin($("#cameraViewfinder"));\n  const frameSequence = createFrameSequence(state.frames);\n  const audioEngine = createAudioEngine($("#audioPreview"));\n\n  function persistTimeline() {
     storage.write(STORAGE_KEYS.timeline, {
       markers: state.markers,
       tracks: state.tracks
@@ -112,20 +114,6 @@
     $("#projectCoverInput").value = "";
     if (dialog?.showModal) dialog.showModal();
     else notify("Project creation requires a modern browser.");
-  }
-
-  // Convert an uploaded cover into a small JPEG thumbnail so the browser
-  // stores a lightweight preview rather than the full-resolution original.
-  async function readCoverThumbnail(file) {
-    if (!file || !file.type.startsWith("image/")) return "";
-    const source = await createImageBitmap(file);
-    const scale = Math.min(1, 640 / Math.max(source.width, source.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(source.width * scale));
-    canvas.height = Math.max(1, Math.round(source.height * scale));
-    canvas.getContext("2d").drawImage(source, 0, 0, canvas.width, canvas.height);
-    source.close?.();
-    return canvas.toDataURL("image/jpeg", 0.78);
   }
 
   function createProjectCard(project, index) {
@@ -250,7 +238,7 @@
         const finish = () => {
           const track = state.tracks.find(item => item.id === lane.dataset.laneId);
           const model = track?.clips.find(item => item.id === clip.dataset.clipId);
-          if (model) model.start = Math.round(parseFloat(clip.style.left) / 100 * 120);
+          if (model) moveClip(state.tracks, lane.dataset.laneId, clip.dataset.clipId, Math.round(parseFloat(clip.style.left) / 100 * 120));
           clip.classList.remove("dragging");
           clip.removeEventListener("pointermove", move);
           clip.removeEventListener("pointerup", finish);
@@ -300,7 +288,7 @@
   function addTrack() {
     const name = window.prompt("Name this track:", "New track");
     if (!name?.trim()) return;
-    state.tracks.push({ id: makeId("track"), name: name.trim(), clips: [] });
+    state.tracks.push(createTrack(name));
     persistTimeline();
     renderTimeline();
     notify("Track added.");
@@ -309,7 +297,7 @@
   function addMarker() {
     const name = window.prompt("Marker name:", "Shot marker");
     if (!name?.trim()) return;
-    state.markers.push({ id: makeId("marker"), name: name.trim(), frame: state.frame });
+    state.markers.push(createMarker(name, state.frame));
     persistTimeline();
     renderTimeline();
     notify("Marker added at frame " + state.frame + ".");
@@ -460,7 +448,7 @@
     let cover = "";
     try {
       // Thumbnail failure must never prevent the creator from saving the project.
-      cover = await readCoverThumbnail($("#projectCoverInput").files[0]);
+      cover = await makeCoverThumbnail($("#projectCoverInput").files[0]);
     } catch (error) {
       console.warn("[PhoenixFrame] Project thumbnail could not be processed:", error);
       notify("The project will be created without a cover thumbnail.");
