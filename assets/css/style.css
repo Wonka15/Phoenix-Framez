@@ -386,3 +386,13 @@ input::placeholder{color:#77839a}
 .camera-viewfinder[data-aspect="1:1"]{aspect-ratio:1/1;min-height:0}
 .camera-viewfinder[data-aspect="2.39:1"]{aspect-ratio:2.39/1;min-height:0}
 @media(max-width:700px){.stop-motion-transport{justify-content:flex-start}.exposure-cell{flex-basis:70px}.interval-controls{align-items:stretch;flex-direction:column}}
+
+/* Monitor switching keeps live camera assist and captured animation playback distinct. */
+.monitor-mode-controls{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.monitor-mode-controls button.active{border-color:#b9a5ff88;background:#b9a5ff22;color:#f0eaff}
+#animationPreviewFrame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;background:#080d16}
+#animationPreviewFrame[hidden]{display:none}
+.camera-viewfinder.show-animation-frame #cameraVideo{visibility:hidden}
+.camera-viewfinder.show-animation-frame .onion-skin-image{display:none}
+.camera-viewfinder.show-animation-frame .viewfinder-center{display:none}
+.camera-viewfinder.show-animation-frame #animationPreviewFrame{display:block}
