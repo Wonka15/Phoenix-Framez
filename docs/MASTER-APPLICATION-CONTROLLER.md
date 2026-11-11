@@ -48,6 +48,53 @@ Blender 5.3 introduces initial OpenTimelineIO support in the Video Sequencer. Ev
 
 Run only reviewed adapter-owned scripts. Use temporary job directories and explicit input/output allowlists. Confirm file opening, writing and expensive renders. Provide cancellation and visible logs. Do not upload .blend files or assets to a remote service unless the user explicitly asks.
 
+## Bidirectional live synchronization
+
+Blender integration is intended to be genuinely two-way for explicitly supported properties. PhoenixFrame is not merely a remote-control panel and Blender is not merely an export target. Either application may originate a supported change, and the other should reflect it in near real time.
+
+### Initial synchronized properties
+
+- Current frame / playhead position (including timeline scrubbing and playback updates).
+- Active scene, when a stable scene mapping exists.
+- Scene frame rate and frame range (start/end), with explicit conflict handling.
+- Timeline markers: create, move, rename and delete, with stable cross-application IDs.
+- Connection state, active project identity and supported capability/version information.
+
+### Event transport
+
+Use a persistent local WebSocket connection between the PhoenixFrame browser and the local bridge. The Blender adapter/extension communicates with the same bridge. The bridge validates, normalizes and relays versioned events; it does not become a second source of truth for project content.
+
+Each event should include protocol version, project ID, mapped scene ID, property, value, origin application, client/session ID, monotonically increasing sequence number, timestamp and correlation/causation ID. Validate every payload against a strict schema and reject unknown operations.
+
+### Preventing feedback loops and conflicts
+
+- Every update carries an origin and event ID. A receiver applies remote changes without echoing them back as a new local edit.
+- Use sequence numbers and last-applied event IDs to ignore duplicates and stale messages.
+- For high-frequency playhead movement, throttle/coalesce outbound updates (for example, send the latest frame at a bounded rate while scrubbing) and always send the final settled frame.
+- Use an explicit active-controller/lease for playback transport so two applications do not continuously fight over play/pause state. Playhead following can remain bidirectional when only one side is actively driving it.
+- For discrete edits such as marker rename or frame-range changes, use versioned updates and surface a conflict instead of silently overwriting a newer edit.
+- If disconnected, queue only safe discrete edits with their base revision; do not queue a long stream of stale playhead events. Reconnect with a state snapshot and reconcile before resuming live sync.
+- Provide visible Sync On/Off, source/driver, latency/connection state and a pause-sync control.
+
+### Blender event sources and thread safety
+
+Use Blender's `bpy.app.handlers.frame_change_post` to observe frame changes from timeline scrubbing and playback. Use `bpy.msgbus` for supported RNA property notifications, but do not assume it observes every viewport interaction or animation-system update; Blender documents those limitations. Handlers should enqueue compact events for the bridge and avoid blocking network I/O or performing unsafe Blender data mutations from render-related callbacks. Apply incoming Blender changes on Blender's main thread through a timer/operator or another supported main-thread mechanism. Re-register subscriptions/handlers after file loads and clean them up on extension disable.
+
+### Synchronization scope
+
+Live synchronization of playhead, scene selection, frame range and timeline markers is a realistic first release. It does not mean arbitrary Blender edits—mesh topology, rigging, materials, node graphs, animation curves or modifier stacks—will automatically mirror into PhoenixFrame. Those require separate, explicit adapters and data models. The browser should label unsupported changes clearly.
+
+### First acceptance tests
+
+1. Scrub PhoenixFrame from frame 1 to 100; Blender follows without echo loops.
+2. Scrub Blender from frame 100 to 1; PhoenixFrame follows.
+3. Start playback in Blender; PhoenixFrame playhead follows at a smooth, throttled update rate.
+4. Move a marker in either application; the other updates exactly once.
+5. Change scene frame range in either application; the other reflects it or displays a conflict.
+6. Disconnect the bridge mid-session; the UI shows offline state, then reconnects and reconciles from a fresh snapshot.
+7. Load a different .blend file; old scene mappings and subscriptions are safely replaced.
+8. Verify no network call blocks Blender's UI or causes unsafe data mutation during rendering.
+
 ## Other application adapters
 
 Future candidates include Eagle Animation, Godot, video editors, image tools and 3D applications. Add an adapter only after inspecting official APIs, scripting interfaces or supported interchange formats. Do not claim control of any arbitrary application; unsupported tools remain manual workflow links.
