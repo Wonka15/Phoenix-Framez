@@ -17,8 +17,8 @@ export function normalizeTimeline(value = {}) {
       clips: Array.isArray(track.clips) ? track.clips.map(clip => ({
         id: String(clip.id || makeId("clip")),
         label: String(clip.label || "Untitled clip"),
-        start: clampFrame(clip.start),
         duration: Math.max(1, Math.min(120, Number(clip.duration) || 1)),
+        start: Math.min(120 - Math.max(1, Math.min(120, Number(clip.duration) || 1)), clampFrame(clip.start)),
         color: ["purple", "blue", "amber", "rose"].includes(clip.color) ? clip.color : "blue"
       })) : []
     })),
