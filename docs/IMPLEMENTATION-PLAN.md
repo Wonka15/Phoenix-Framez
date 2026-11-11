@@ -69,7 +69,7 @@ Acceptance: all edits are frame-accurate, survive reload, are undoable, and work
 
 - [x] Previous captured still can be overlaid in the camera monitor with adjustable opacity.
 - [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
-- [ ] Drawing tools with layers and non-destructive edits.
+- [x] Per-frame non-destructive pen, line, arrow and eraser drawing layers.\n- [x] Undo and clear drawing operations for the current exposure.
 - [ ] Text cards and speech bubbles.
 - [ ] Rotoscoping over imported video.
 - [ ] Object removal / eraser and facial-expression overlays.
@@ -159,3 +159,10 @@ Features requiring hardware-specific APIs or larger dedicated subsystems remain 
 The official Dragonframe feature overview describes animation tools, cinematography, audio, DMX lighting, motion control, image capture, X-Sheet/project management, stereoscopic 3D, time-lapse and export. PhoenixFrame now implements a stop-motion-first browser workflow for still capture/import, ordered exposures, a clickable exposure sheet, previous-frame onion skin, live/captured monitor switching, frame stepping, selectable playback rates, looping, short-play preview, composition guides, monitor blackout and basic interval capture.
 
 Not implemented yet: direct DSLR manual camera control, camera-specific test shots, vector drawing/motion paths, full rotoscoping and chroma key, full dialogue phoneme X-Sheet, multitrack audio waveform editing/time-warp, DMX lighting, motion-control hardware, stereoscopic capture and rendered movie/GIF export. These require dedicated adapters, richer project data and device/browser testing; they must not be represented as working controls before implementation.
+
+
+## Animation-tools workspace
+
+The Animation tools view provides non-destructive per-exposure annotation layers. Pen, straight-line, arrow and eraser strokes are stored as normalized vector coordinates, separate from the source photograph. Motion-path points are stored independently and drawn as a dashed guide. Reference stills are resized before being stored as per-frame overlays with adjustable opacity. Difference view uses a blend-mode comparison against the previous exposure. Undo and clear affect only the selected exposure's overlay data.
+
+Animation layer data is persisted locally and included in the version-1 project archive as an optional field so older v1 archives remain importable. The canvas is a visual guide/editor; compositing, rotoscoping and final rendered output remain separate milestones.
