@@ -22,6 +22,7 @@
         <button class="nav-item" data-view="projects"><span>▧</span> Projects</button>
         <button class="nav-item" data-view="timeline"><span>◷</span> Timeline</button>
         <button class="nav-item" data-view="camera"><span>◎</span> Camera station</button>
+        <button class="nav-item" data-view="animation-tools"><span>✎</span> Animation tools</button>
         <button class="nav-item" data-view="lipsync"><span>◖</span> Lip Sync</button>
         <button class="nav-item" data-view="integrations"><span>⌘</span> Integrations</button>
       </nav>
@@ -85,6 +86,48 @@
         <div class="notice"><strong>Camera compatibility:</strong> browser live view and still capture use device camera permission. Manual ISO, shutter, focus and white-balance control require a camera-specific adapter; the generic browser camera API does not expose those settings.</div>
       </section>
 
+      <section class="view" id="animation-toolsView">
+        <div class="page-intro page-intro-row"><div><div class="eyebrow">DRAW · COMPARE · PLAN</div><h1>Animation tools</h1><p class="muted">Add editable drawing layers, reference overlays and motion-path guides to each stop-motion exposure.</p></div><span class="camera-state"><i></i> Non-destructive workspace</span></div>
+        <div class="animation-tools-layout">
+          <section class="panel animation-editor">
+            <div class="animation-editor-toolbar">
+              <div class="tool-group" role="group" aria-label="Drawing tools">
+                <button type="button" class="tool-choice active" data-animation-tool="pen" aria-pressed="true">✎ Pen</button>
+                <button type="button" class="tool-choice" data-animation-tool="line" aria-pressed="false">／ Line</button>
+                <button type="button" class="tool-choice" data-animation-tool="arrow" aria-pressed="false">↗ Arrow</button>
+                <button type="button" class="tool-choice" data-animation-tool="motion" aria-pressed="false">⌁ Motion path</button>
+                <button type="button" class="tool-choice" data-animation-tool="eraser" aria-pressed="false">⌫ Eraser</button>
+              </div>
+              <div class="tool-group tool-actions">
+                <button type="button" class="secondary-btn" id="undoAnnotationBtn">Undo</button>
+                <button type="button" class="secondary-btn" id="clearAnnotationBtn">Clear layer</button>
+              </div>
+            </div>
+            <div class="animation-stage" id="animationStage">
+              <img id="toolsFrameImage" alt="Selected stop-motion frame" hidden>
+              <img id="toolsPreviousImage" alt="" aria-hidden="true" hidden>
+              <img id="toolsReferenceImage" alt="Reference image overlay" hidden>
+              <canvas id="annotationCanvas" aria-label="Drawing canvas for the selected animation frame"></canvas>
+              <div class="animation-stage-empty" id="animationStageEmpty"><strong>Select or capture an exposure</strong><span>Your drawing and motion guides will be attached to that frame.</span></div>
+              <span class="stage-frame-label" id="toolsFrameLabel">FRAME 001</span>
+            </div>
+            <div class="animation-editor-footer"><span id="annotationStatus" class="muted tiny">Drawing layer · Frame 001</span><span class="muted tiny">Edits remain separate from the original photograph</span></div>
+          </section>
+          <aside class="panel animation-inspector">
+            <div class="panel-heading"><div><h3>Layer controls</h3><p class="muted">Frame-specific overlays</p></div><span class="settings-icon">✧</span></div>
+            <label class="tool-setting">Brush color<input type="color" id="annotationColor" value="#ffcf83"></label>
+            <label class="tool-setting">Brush size <output id="brushSizeValue">4 px</output><input type="range" id="annotationWidth" min="1" max="24" value="4"></label>
+            <div class="inspector-divider"></div>
+            <div class="inspector-section"><strong>Reference image</strong><p class="muted tiny">Place a guide image over the current frame. It is not merged into your photograph.</p><button type="button" class="secondary-btn" id="referenceImageChoose">＋ Add reference</button><input type="file" id="referenceImageInput" accept="image/*" hidden><label class="tool-setting">Reference opacity<input type="range" id="referenceOpacity" min="0" max="100" value="35"></label><button type="button" class="text-btn" id="removeReferenceBtn">Remove reference</button></div>
+            <div class="inspector-divider"></div>
+            <div class="inspector-section"><strong>Frame comparison</strong><label class="inspector-check"><input type="checkbox" id="differenceModeToggle"> Difference view (previous exposure)</label><p class="muted tiny">Uses a difference blend to make movement between adjacent exposures easier to spot.</p></div>
+            <div class="inspector-divider"></div>
+            <div class="inspector-section"><strong>Motion path</strong><p class="muted tiny">Choose Motion path, then tap or click the image to place path points. Undo removes the latest point after strokes.</p><button type="button" class="text-btn" id="clearMotionPathBtn">Clear motion path</button></div>
+          </aside>
+        </div>
+        <div class="notice"><strong>Layer safety:</strong> drawings, reference images and motion guides are stored as separate per-frame project data. The source still is never painted over.</div>
+      </section>
+
       <section class="view" id="lipsyncView">
         <div class="page-intro"><div class="eyebrow">DIALOGUE & PERFORMANCE</div><h1>Lip Sync</h1><p class="muted">Build a simple mouth-cue sheet alongside your dialogue.</p></div>
         <div class="panel lipsync-panel"><div class="panel-heading"><div><h3>Mouth cue sheet</h3><p class="muted">Add phoneme or expression cues at specific frames.</p></div><button class="primary-btn" id="addCueBtn">＋ Add cue</button></div><div class="cue-form"><label>Frame<input id="cueFrame" type="number" min="0" value="1"></label><label>Mouth shape<select id="cueShape"><option value="Rest">Rest</option><option value="A / I">A / I</option><option value="E">E</option><option value="O">O</option><option value="U">U</option><option value="FV">F / V</option><option value="MBP">M / B / P</option><option value="L">L</option></select></label><label>Note<input id="cueNote" type="text" placeholder="Optional dialogue note"></label></div><div id="cueList" class="cue-list"><div class="empty-state compact"><div class="empty-icon">◖</div><strong>No cues yet</strong><p>Add a cue to begin your mouth-shape sequence.</p></div></div><p class="footnote">Cue data is currently stored locally in this browser. Audio waveform analysis and Eagle project export are planned features.</p></div>
@@ -99,8 +142,8 @@
         </div>
         <div class="notice"><strong>Honest status:</strong> these are roadmap entries, not active connections. No integration is claimed as working until it has been implemented and tested.</div>
       </section>
-      <div class="floating-toolbar" role="toolbar" aria-label="Studio quick actions"><button type="button" data-quick-view="projects" aria-label="Open projects" title="Projects">▧</button><button type="button" data-quick-view="timeline" aria-label="Open timeline" title="Timeline">◷</button><button type="button" data-quick-view="camera" aria-label="Open camera station" title="Camera">◎</button><button type="button" id="quickExport" aria-label="Export project manifest" title="Export project">⇧</button></div>
-      <nav class="floating-dock" aria-label="Quick navigation"><button class="dock-tool active" data-dock-view="overview" aria-label="Overview" title="Overview">⌂</button><button class="dock-tool" data-dock-view="projects" aria-label="Projects" title="Projects">▧</button><button class="dock-tool dock-create" id="dockCreate" aria-label="New project" title="New project">＋</button><button class="dock-tool" data-dock-view="timeline" aria-label="Timeline" title="Timeline">◷</button><button class="dock-tool" data-dock-view="camera" aria-label="Camera station" title="Camera station">◎</button></nav>
+      <div class="floating-toolbar" role="toolbar" aria-label="Studio quick actions"><button type="button" data-quick-view="projects" aria-label="Open projects" title="Projects">▧</button><button type="button" data-quick-view="timeline" aria-label="Open timeline" title="Timeline">◷</button><button type="button" data-quick-view="camera" aria-label="Open camera station" title="Camera">◎</button><button type="button" data-quick-view="animation-tools" aria-label="Open animation tools" title="Animation tools">✎</button><button type="button" id="quickExport" aria-label="Export project manifest" title="Export project">⇧</button></div>
+      <nav class="floating-dock" aria-label="Quick navigation"><button class="dock-tool active" data-dock-view="overview" aria-label="Overview" title="Overview">⌂</button><button class="dock-tool" data-dock-view="projects" aria-label="Projects" title="Projects">▧</button><button class="dock-tool dock-create" id="dockCreate" aria-label="New project" title="New project">＋</button><button class="dock-tool" data-dock-view="timeline" aria-label="Timeline" title="Timeline">◷</button><button class="dock-tool" data-dock-view="camera" aria-label="Camera station" title="Camera station">◎</button><button class="dock-tool" data-dock-view="animation-tools" aria-label="Animation tools" title="Animation tools">✎</button></nav>
       <footer class="app-footer"><span>🔥 PHOENIXFRAME 1.0</span><span>Made for the creative process.</span></footer>
     </main>
   </div>
