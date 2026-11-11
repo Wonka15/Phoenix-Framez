@@ -7,7 +7,8 @@ export function buildProjectArchive(state) {
     projects: state.projects,
     cues: state.cues,
     timeline: { markers: state.markers, tracks: state.tracks },
-    frames: state.frames
+    frames: state.frames,
+    animationEdits: state.animationEdits || {}
   };
 }
 
@@ -20,7 +21,11 @@ export function validateProjectArchive(value) {
       !Array.isArray(value.timeline.tracks) || !Array.isArray(value.timeline.markers)) {
     throw new TypeError("The project file is missing required data.");
   }
-  return value;
+  // v1 archives created before drawing layers existed remain fully importable.
+  if (value.animationEdits !== undefined && (!value.animationEdits || typeof value.animationEdits !== "object" || Array.isArray(value.animationEdits))) {
+    throw new TypeError("The animation layer data is invalid.");
+  }
+  return { ...value, animationEdits: value.animationEdits || {} };
 }
 
 export function downloadJson(value, filename) {
