@@ -36,7 +36,8 @@ Acceptance: a project survives reload, cover thumbnails render, exported JSON va
 - [x] Local persistence for imported/captured frames.
 - [x] Previous-frame still overlay with opacity controls (previous captured/imported still; next-frame ghosting remains future work).
 - [ ] Exposure, focus, ISO and white-balance controls where the connected camera API supports them.
-- [ ] Timelapse / interval capture with pause, stop and error recovery.
+- [x] Basic interval capture with configurable seconds and start/stop controls.
+- [ ] Scheduled start/end time, precision scheduling and robust capture error recovery.
 - [ ] Toucan Camera Server adapter and tested camera compatibility list.
 - [ ] Remote camera trigger / companion-device controls.
 
@@ -50,7 +51,7 @@ Acceptance: test built-in camera and supported external camera devices on iPad S
 - [x] Reorder tracks using drag and drop.
 - [x] Persist track and marker state locally.
 - [ ] Touch-first track reordering and clip resizing handles.
-- [ ] Frame-by-frame capture strip and exposure-sheet view.
+- [x] Frame-by-frame capture strip and clickable exposure-sheet view.
 - [ ] Undo/redo command history.
 - [x] Copy, paste, insert blank and delete stills in the frame library.
 - [ ] Cut, duplicate, and timeline-integrated frame editing.
@@ -140,3 +141,10 @@ No native application integration is complete until it passes the documented acc
 8. Never claim an integration is connected until a real adapter and test pass.
 9. Add automated tests for data models and browser interactions before promoting work from `ndev` to `main`.
 10. Update this checklist and the README whenever feature status changes.
+
+
+## Dragonframe-inspired feature mapping
+
+PhoenixFrame implements its own stop-motion workflow informed by the publicly described Dragonframe feature categories. Current working features include browser camera live view, still capture/import, ordered exposures, a selectable exposure sheet, previous-frame onion skin over live view, captured-frame monitor playback, frame stepping, configurable playback FPS, looping, short-play preview, interval capture, composition guides, monitor blackout and a local project archive.
+
+Features requiring hardware-specific APIs or larger dedicated subsystems remain planned: DSLR exposure/focus control, test-shot tray, reference-video chroma key and garbage mattes, vector drawing and motion paths, full X-sheet dialogue phonetics, multitrack waveform editing and time-warp, DMX lighting, motion-control hardware, stereoscopic capture, and final movie/GIF rendering. The generic browser camera API does not expose DSLR manual controls or guarantee precision shutter timing.
