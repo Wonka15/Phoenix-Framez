@@ -457,26 +457,27 @@
     if (!name) return;
     const saveButton = $("#saveProjectBtn");
     saveButton.disabled = true;
+    let cover = "";
     try {
-      const cover = await readCoverThumbnail($("#projectCoverInput").files[0]);
-      state.projects.unshift({
-        id: makeId("project"),
-        name,
-        type: $("#projectTypeInput").value,
-        date: new Date().toLocaleDateString(),
-        cover
-      });
-      storage.write(STORAGE_KEYS.projects, state.projects);
-      renderProjects();
-      dialog.close();
-      showView("projects");
-      notify("Project created.");
+      // Thumbnail failure must never prevent the creator from saving the project.
+      cover = await readCoverThumbnail($("#projectCoverInput").files[0]);
     } catch (error) {
       console.warn("[PhoenixFrame] Project thumbnail could not be processed:", error);
-      notify("Project created without its thumbnail.");
-    } finally {
-      saveButton.disabled = false;
+      notify("The project will be created without a cover thumbnail.");
     }
+    state.projects.unshift({
+      id: makeId("project"),
+      name,
+      type: $("#projectTypeInput").value,
+      date: new Date().toLocaleDateString(),
+      cover
+    });
+    storage.write(STORAGE_KEYS.projects, state.projects);
+    renderProjects();
+    dialog.close();
+    showView("projects");
+    saveButton.disabled = false;
+    notify("Project created.");
   });
 
   $("#projectSearch").addEventListener("input", renderProjectBrowser);
