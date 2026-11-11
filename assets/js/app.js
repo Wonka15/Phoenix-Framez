@@ -389,11 +389,31 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   }
 
   // ---------- Camera station ----------
+  function setCameraStatus(message, live = false) {
+    const badge = $("#cameraStateBadge");
+    const pill = $(".preview-pill");
+    if (badge) {
+      badge.classList.toggle("is-live", live);
+      badge.innerHTML = "<i></i> " + (live ? "Camera on" : "Camera off");
+    }
+    if (pill) {
+      pill.classList.toggle("live", live);
+      pill.innerHTML = "<i></i> " + (live ? "LIVE CAMERA" : "CAMERA OFF");
+    }
+    if ($("#cameraPermissionStatus")) $("#cameraPermissionStatus").textContent = message;
+  }
+
   async function connectCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraStatus("Camera access needs HTTPS or localhost and a supported browser.", false);
       notify("Camera access needs HTTPS or localhost and a supported browser.");
       return;
     }
+    // This function is called only by the user's explicit button press.
+    $("#cameraConnectBtn").disabled = true;
+    $("#cameraConnectBtn").textContent = "Waiting for permission…";
+    $("#cameraPrivacyStatus").textContent = "Waiting for your browser's camera permission decision.";
+    $("#cameraPermissionStatus").textContent = "Your browser should now ask whether PhoenixFramez may use the camera.";
     try {
       state.cameraStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
@@ -406,21 +426,37 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
         video.autoplay = true;
         video.playsInline = true;
         video.muted = true;
+        video.setAttribute("aria-label", "Local live camera preview");
         $("#cameraViewfinder").prepend(video);
       }
       video.srcObject = state.cameraStream;
+      await video.play().catch(() => {});
       $("#cameraViewfinder").classList.add("has-camera");
-      $("#cameraConnectBtn").textContent = "Disconnect camera";
+      $("#cameraConnectBtn").textContent = "Turn camera off";
       $("#cameraSource").value = "Local camera (browser permission)";
-      $(".preview-pill").innerHTML = "<i></i> LIVE CAMERA";
-      notify("Camera connected.");
+      $("#cameraPrivacyStatus").textContent = "Camera is active locally in this browser. No camera video or audio is sent to PhoenixFramez servers or used for analytics.";
+      setCameraStatus("Live preview active. Turn the camera off whenever you like.", true);
+      state.cameraStream.getVideoTracks().forEach(track => {
+        track.addEventListener("ended", () => {
+          if (state.cameraStream) disconnectCamera(false);
+        }, { once: true });
+      });
+      notify("Camera connected. Your live feed stays in this browser.");
     } catch (error) {
+      state.cameraStream = null;
+      $("#cameraConnectBtn").textContent = "Try camera permission again";
+      $("#cameraPrivacyStatus").textContent = error.name === "NotAllowedError"
+        ? "Camera permission was denied or blocked. You can change this in your browser's site settings."
+        : "No camera feed was started. No camera frames were received.";
+      setCameraStatus(error.name === "NotAllowedError" ? "Permission denied. Check browser site settings to allow camera access." : "Could not start the camera. Check that a camera is connected and not being used by another app.", false);
       notify(error.name === "NotAllowedError" ? "Camera permission was denied." : "Could not connect to a camera.");
+    } finally {
+      $("#cameraConnectBtn").disabled = false;
     }
   }
 
-  function disconnectCamera() {
-    // A disconnected camera must never leave a background interval-capture timer running.
+  function disconnectCamera(showNotice = true) {
+    // Stop every media track immediately and stop interval capture before removing the preview.
     if (state.intervalTimer) {
       window.clearInterval(state.intervalTimer);
       state.intervalTimer = null;
@@ -429,12 +465,18 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     }
     state.cameraStream?.getTracks().forEach(track => track.stop());
     state.cameraStream = null;
-    $("#cameraVideo")?.remove();
+    const video = $("#cameraVideo");
+    if (video) {
+      video.pause();
+      video.srcObject = null;
+      video.remove();
+    }
     $("#cameraViewfinder").classList.remove("has-camera");
-    $("#cameraConnectBtn").textContent = "Connect camera";
-    $(".preview-pill").innerHTML = "<i></i> PREVIEW MOCKUP";
+    $("#cameraConnectBtn").textContent = "Turn camera on";
     $("#cameraSource").value = "Not connected";
-    notify("Camera disconnected.");
+    $("#cameraPrivacyStatus").textContent = "Camera is off. PhoenixFramez has stopped the camera tracks; no live feed is active.";
+    setCameraStatus("Camera is off. No live camera feed is active.", false);
+    if (showNotice) notify("Camera off. Camera access has stopped.");
   }
 
   function syncFrameSelection() {
@@ -725,9 +767,23 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#maskGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-mask", event.target.checked));
   $("#captureBlackoutToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("capture-blackout", event.target.checked));
   $("#intervalCaptureBtn").addEventListener("click", toggleIntervalCapture);
-  $("#onionOpacity").addEventListener("input", event => onionSkin.setOpacity(event.target.value));
+  $("#onionOpacity").addEventListener("input", event => {
+    onionSkin.setOpacity(event.target.value);
+    $("#onionOpacityValue").textContent = event.target.value + "%";
+  });
+  $("#expandCameraBtn").addEventListener("click", () => {
+    const expanded = $("#cameraViewfinder").classList.toggle("is-expanded");
+    $("#expandCameraBtn").setAttribute("aria-pressed", String(expanded));
+    $("#expandCameraBtn").textContent = expanded ? "⤢ Fit view" : "⛶ Expand view";
+  });
   onionSkin.setEnabled($("#onionToggle").checked);
   onionSkin.setOpacity($("#onionOpacity").value);
+  $("#onionOpacityValue").textContent = $("#onionOpacity").value + "%";
+  setCameraStatus("Camera is off. Turn it on when you're ready.", false);
+  window.addEventListener("pagehide", () => {
+    state.cameraStream?.getTracks().forEach(track => track.stop());
+    state.cameraStream = null;
+  });
   $("#cameraViewfinder").classList.toggle("guide-grid", $("#gridGuideToggle").checked);
   $("#cameraViewfinder").classList.toggle("guide-safe", $("#safeGuideToggle").checked);
   $("#cameraViewfinder").classList.toggle("guide-mask", $("#maskGuideToggle").checked);
