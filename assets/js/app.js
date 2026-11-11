@@ -682,12 +682,12 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return notify("WebM recording is not available in this browser. Export a ZIP image sequence instead.");
     const first=new Image();first.src=frames[0].src;try{await first.decode();}catch{return notify("Could not read the first frame.");}
     const canvas=document.createElement("canvas");canvas.width=first.naturalWidth;canvas.height=first.naturalHeight;const ctx=canvas.getContext("2d");
-    const stream=canvas.captureStream(state.playbackFps),track=stream.getVideoTracks()[0];const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
+    const stream=canvas.captureStream(state.playbackFps),track=stream.getVideoTracks()[0];const mime=["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
     if(!mime){stream.getTracks().forEach(t=>t.stop());return notify("This browser does not support WebM recording.");}
     const recorder=new MediaRecorder(stream,{mimeType:mime}),chunks=[];recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
     const done=new Promise(resolve=>recorder.onstop=resolve);recorder.start();
     try{for(const frame of frames){const img=new Image();img.src=frame.src;await img.decode();ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);track.requestFrame?.();await new Promise(resolve=>setTimeout(resolve,1000/state.playbackFps));}
-      recorder.stop();await done;downloadBlob(new Blob(chunks,{type:mime}),"phoenixframez-animation.webm");notify("WebM exported at "+state.playbackFps+" FPS.");
+      recorder.stop();await done;const extension=mime.includes("mp4")?"mp4":"webm";downloadBlob(new Blob(chunks,{type:mime}),"phoenixframez-animation."+extension);notify(extension.toUpperCase()+" exported at "+state.playbackFps+" FPS.");
     }catch(error){if(recorder.state!=="inactive")recorder.stop();notify(error.message||"Movie export failed.");}finally{stream.getTracks().forEach(t=>t.stop());}
   }
 
