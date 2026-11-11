@@ -300,3 +300,20 @@ input::placeholder{color:#77839a}
 }
 @media(max-width:390px){.project-browser-grid{grid-template-columns:1fr}.dock-tool{width:38px;height:40px}.floating-dock{gap:1px}}
 @media(hover:none){.project-card:hover{transform:none}.dock-tool{min-width:42px;min-height:42px}}
+
+
+.thumb-violet{background:radial-gradient(ellipse at 70% 25%,#b6a2ff88,transparent 45%),linear-gradient(135deg,#35416c,#171d35 70%,#3d3158)}
+.thumb-blue{background:radial-gradient(ellipse at 70% 25%,#83caff88,transparent 45%),linear-gradient(135deg,#234b68,#111e34 70%,#293c59)}
+.thumb-amber{background:radial-gradient(ellipse at 70% 25%,#ffc77e88,transparent 45%),linear-gradient(135deg,#5b4938,#1c2133 70%,#54402e)}
+.thumb-rose{background:radial-gradient(ellipse at 70% 25%,#ef9fce88,transparent 45%),linear-gradient(135deg,#59405e,#1c1d35 70%,#503b58)}
+.timeline-marker{position:absolute;top:0;bottom:0;width:2px;background:#ffcf83;z-index:3;box-shadow:0 0 8px #ffcf83aa}
+.timeline-marker::before{content:"";position:absolute;top:0;left:-3px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #ffcf83}
+.camera-viewfinder.has-camera{background:#080d16}
+#cameraVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0}
+.camera-viewfinder.has-camera .viewfinder-center{display:none}
+.camera-viewfinder.has-camera .viewfinder-grid{pointer-events:none;z-index:1}
+.camera-viewfinder.onion-enabled::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(185,165,255,var(--onion-opacity,.35)),transparent 65%);mix-blend-mode:screen}
+.camera-viewfinder .viewfinder-meta{z-index:2}
+.recent-project-list{min-height:120px}
+@media(max-width:900px) and (min-width:701px){.sidebar{width:210px}.main-content{margin-left:235px;padding-right:20px}.camera-layout{grid-template-columns:1fr}.camera-side{grid-template-columns:1fr 1fr}}
+@media(orientation:landscape) and (max-height:600px){.floating-dock{bottom:8px}.sidebar{inset:8px auto 8px 8px}.main-content{padding-bottom:68px}}
