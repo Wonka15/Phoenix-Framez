@@ -963,52 +963,57 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     } catch (error) { console.warn("[PhoenixFrame] Archive import failed:", error); notify(error.message || "Could not import this project archive."); }
     finally { event.target.value = ""; }
   });
-  // Camera power rocker supports both a deliberate swipe and a simple tap.
-  // Pointer capture keeps the gesture working when a finger moves beyond the switch.
+  // Camera power switch:
+  // Keep the native button click as the reliable tap/keyboard path on iPad.
+  // Dragging is an enhancement only; it must never suppress an ordinary tap.
   const cameraPowerControl = $("#cameraConnectBtn");
   let cameraSwitchPointerStart = null;
-  let ignoreCameraSwitchClick = false;
+  let ignoreNextCameraClick = false;
   cameraPowerControl.addEventListener("pointerdown", event => {
     if (event.button !== 0 || cameraPowerControl.disabled) return;
-    cameraSwitchPointerStart = { x: event.clientX, y: event.clientY, left: state.cameraStream ? 62 : 4 };
+    cameraSwitchPointerStart = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      left: state.cameraStream ? 62 : 4,
+      moved: false
+    };
     cameraPowerControl.classList.add("is-dragging");
-    cameraPowerControl.setPointerCapture?.(event.pointerId);
   });
-  cameraPowerControl.addEventListener("pointermove", event => {
-    if (!cameraSwitchPointerStart) return;
+  window.addEventListener("pointermove", event => {
+    if (!cameraSwitchPointerStart || event.pointerId !== cameraSwitchPointerStart.id) return;
     const delta = event.clientX - cameraSwitchPointerStart.x;
-    const left = Math.max(4, Math.min(62, cameraSwitchPointerStart.left + delta));
+    if (Math.abs(delta) >= 6) cameraSwitchPointerStart.moved = true;
+    if (!cameraSwitchPointerStart.moved) return;
     const knob = cameraPowerControl.querySelector(".power-switch-knob");
-    if (knob) knob.style.left = left + "px";
+    if (knob) knob.style.left = Math.max(4, Math.min(62, cameraSwitchPointerStart.left + delta)) + "px";
   });
-  cameraPowerControl.addEventListener("pointerup", event => {
-    if (!cameraSwitchPointerStart) return;
-    const delta = event.clientX - cameraSwitchPointerStart.x;
-    const moved = Math.abs(delta) >= 18;
+  window.addEventListener("pointerup", event => {
+    if (!cameraSwitchPointerStart || event.pointerId !== cameraSwitchPointerStart.id) return;
+    const gesture = cameraSwitchPointerStart;
     cameraSwitchPointerStart = null;
     cameraPowerControl.classList.remove("is-dragging");
     const knob = cameraPowerControl.querySelector(".power-switch-knob");
     if (knob) knob.style.left = "";
-    // Handle taps here as well as drags: iOS embedded browsers can occasionally
-    // swallow the synthetic click after pointer capture or a permission transition.
-    ignoreCameraSwitchClick = true;
-    window.setTimeout(() => { ignoreCameraSwitchClick = false; }, 0);
-    if (!moved) {
-      state.cameraStream ? disconnectCamera() : connectCamera();
-      return;
-    }
-    const wantsOn = delta > 0;
+    if (!gesture.moved) return; // Let the button's native click toggle the camera.
+    ignoreNextCameraClick = true;
+    window.setTimeout(() => { ignoreNextCameraClick = false; }, 500);
+    const wantsOn = event.clientX - gesture.x > 0;
     if (wantsOn && !state.cameraStream) connectCamera();
     else if (!wantsOn && state.cameraStream) disconnectCamera();
   });
-  cameraPowerControl.addEventListener("pointercancel", () => {
+  window.addEventListener("pointercancel", event => {
+    if (!cameraSwitchPointerStart || event.pointerId !== cameraSwitchPointerStart.id) return;
     cameraSwitchPointerStart = null;
     cameraPowerControl.classList.remove("is-dragging");
     const knob = cameraPowerControl.querySelector(".power-switch-knob");
     if (knob) knob.style.left = "";
   });
   cameraPowerControl.addEventListener("click", () => {
-    if (ignoreCameraSwitchClick) return;
+    if (ignoreNextCameraClick) {
+      ignoreNextCameraClick = false;
+      return;
+    }
     state.cameraStream ? disconnectCamera() : connectCamera();
   });
   $("#shutterBtn").addEventListener("click", captureFrame);
