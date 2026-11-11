@@ -698,6 +698,23 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     notify("Project archive exported.");
   }
 
+  const onboardingKey = "phoenixframe.onboarding";
+  const onboarding = storage.read(onboardingKey, {});
+  ["stepProject","stepFps","stepIntegration"].forEach(id => {
+    const input = $("#"+id);
+    if (!input) return;
+    input.checked = Boolean(onboarding[id]);
+    input.addEventListener("change", () => { onboarding[id] = input.checked; storage.write(onboardingKey, onboarding); });
+  });
+  function completeOnboardingStep(id) {
+    const input = $("#"+id);
+    if (!input) return;
+    input.checked = true;
+    onboarding[id] = true;
+    storage.write(onboardingKey, onboarding);
+  }
+  $("#integrationsView")?.addEventListener("click", () => completeOnboardingStep("stepIntegration"));
+
   // ---------- Event wiring ----------
   $$(".nav-item").forEach(button => button.addEventListener("click", () => showView(button.dataset.view)));
   $$("[data-go]").forEach(button => button.addEventListener("click", () => showView(button.dataset.go)));
@@ -727,6 +744,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       notify("The project will be created without a cover thumbnail.");
     }
     state.projects.unshift(createProject({ name, type: $("#projectTypeInput").value, cover }));
+    completeOnboardingStep("stepProject");
     storage.write(STORAGE_KEYS.projects, state.projects);
     renderProjects();
     dialog.close();
@@ -849,7 +867,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#stepBackBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.max(1, state.frame - 1)); });
   $("#stepForwardBtn").addEventListener("click", () => { stopPlayback(); setMonitorMode("animation"); setFrame(Math.min(Math.max(1, state.frames.length), state.frame + 1)); });
   $("#shortPlayBtn").addEventListener("click", () => togglePlayback(Math.max(1, state.frame - 11), state.frame, false));
-  $("#playbackFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#captureFps").value = state.playbackFps + " FPS"; $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
+  $("#playbackFps").addEventListener("change", event => { completeOnboardingStep("stepFps"); state.playbackFps = normalizeFps(event.target.value); $("#captureFps").value = state.playbackFps + " FPS"; $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#loopPlayback").addEventListener("change", event => { state.loopPlayback = event.target.checked; });
 
   $("#copyFrameBtn").addEventListener("click", () => {
@@ -943,7 +961,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     event.target.value = "";
   });
   $("#onionToggle").addEventListener("change", event => onionSkin.setEnabled(event.target.checked));
-  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
+  $("#captureFps").addEventListener("change", event => { completeOnboardingStep("stepFps"); state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; if (state.playing) { stopPlayback(); togglePlayback(); } });
   $("#aspectRatioSelect").addEventListener("change", event => { $("#cameraViewfinder").dataset.aspect = event.target.value; $("#cameraAspectReadout").textContent = event.target.value; });
   $("#gridGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-grid", event.target.checked));
   $("#safeGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-safe", event.target.checked));
