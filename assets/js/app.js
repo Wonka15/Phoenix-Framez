@@ -14,11 +14,10 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 /**
  * PhoenixFrame 1.0 — browser studio controller
  * ------------------------------------------------------------
- * This file deliberately keeps the first alpha dependency-free:
- * - DOM helpers and safe storage live at the top.
- * - State is kept in one object and persisted through Storage.
- * - Rendering functions only update their own UI regions.
- * - Event wiring is grouped at the bottom for easy auditing.
+ * This file composes the studio UI from feature modules:
+ * - Domain rules and browser services live in their own folders.
+ * - This entry point owns workspace state, rendering and event wiring.
+ * - Project data is persisted locally and exported as a versioned archive.
  *
  * GitHub Pages is a static host. Camera access uses browser APIs;
  * native desktop integrations must go through the separate local bridge.
@@ -34,10 +33,13 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
   });
 
   const savedTimeline = normalizeTimeline(storage.read(STORAGE_KEYS.timeline, {}));
+  const storedProjects = storage.read(STORAGE_KEYS.projects, []);
+  const storedCues = storage.read(STORAGE_KEYS.cues, []);
+  const storedFrames = storage.read(STORAGE_KEYS.frames, []);
   const state = {
-    projects: Array.isArray(storage.read(STORAGE_KEYS.projects, [])) ? storage.read(STORAGE_KEYS.projects, []) : [],
-    cues: Array.isArray(storage.read(STORAGE_KEYS.cues, [])) ? storage.read(STORAGE_KEYS.cues, []) : [],
-    frames: Array.isArray(storage.read(STORAGE_KEYS.frames, [])) ? storage.read(STORAGE_KEYS.frames, []) : [],
+    projects: Array.isArray(storedProjects) ? storedProjects : [],
+    cues: Array.isArray(storedCues) ? storedCues : [],
+    frames: Array.isArray(storedFrames) ? storedFrames : [],
     markers: savedTimeline.markers,
     tracks: savedTimeline.tracks,
     frame: 1,
