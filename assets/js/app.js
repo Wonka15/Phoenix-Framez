@@ -605,6 +605,37 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   $("#cameraFpsReadout").textContent = state.playbackFps + " FPS";
   $("#timelineFpsLabel").textContent = state.playbackFps + " FPS";
 
+  // Keyboard shortcuts mirror the essential one-key animator controls.
+  document.addEventListener("keydown", event => {
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.code === "Space") {
+      event.preventDefault();
+      togglePlayback();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      stopPlayback();
+      setMonitorMode("animation");
+      setFrame(Math.max(1, state.frame - 1));
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      stopPlayback();
+      setMonitorMode("animation");
+      setFrame(Math.min(state.frames.length || 120, state.frame + 1));
+    } else if (event.key.toLowerCase() === "c" && $("#cameraView").classList.contains("active-view")) {
+      captureFrame();
+    } else if (event.key === "Delete" && $("#cameraView").classList.contains("active-view")) {
+      if (frameSequence.remove(state.selectedFrameIndex)) {
+        state.frames = frameSequence.frames;
+        state.selectedFrameIndex = Math.min(state.selectedFrameIndex, state.frames.length - 1);
+        if (state.selectedFrameIndex >= 0) setFrame(state.selectedFrameIndex + 1);
+        else state.frame = 1;
+        renderFrames();
+      }
+    }
+  });
+
   window.addEventListener("pagehide", () => {
     stopPlayback();
     state.cameraStream?.getTracks().forEach(track => track.stop());
