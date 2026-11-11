@@ -412,6 +412,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     // This function is called only by the user's explicit button press.
     $("#cameraConnectBtn").disabled = true;
     $("#cameraConnectBtn").textContent = "Waiting for permission…";
+    $("#cameraConnectBtn").setAttribute("aria-pressed", "false");
     $("#cameraPrivacyStatus").textContent = "Waiting for your browser's camera permission decision.";
     $("#cameraPermissionStatus").textContent = "Your browser should now ask whether PhoenixFramez may use the camera.";
     try {
@@ -433,6 +434,8 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       await video.play().catch(() => {});
       $("#cameraViewfinder").classList.add("has-camera");
       $("#cameraConnectBtn").textContent = "Turn camera off";
+      $("#cameraConnectBtn").setAttribute("aria-pressed", "true");
+      $("#cameraConnectBtn").setAttribute("aria-label", "Turn camera off");
       $("#cameraSource").value = "Local camera (browser permission)";
       $("#cameraPrivacyStatus").textContent = "Camera is active locally in this browser. No camera video or audio is sent to PhoenixFramez servers or used for analytics.";
       setCameraStatus("Live preview active. Turn the camera off whenever you like.", true);
@@ -444,7 +447,9 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
       notify("Camera connected. Your live feed stays in this browser.");
     } catch (error) {
       state.cameraStream = null;
-      $("#cameraConnectBtn").textContent = "Try camera permission again";
+      $("#cameraConnectBtn").textContent = "Turn camera on";
+      $("#cameraConnectBtn").setAttribute("aria-pressed", "false");
+      $("#cameraConnectBtn").setAttribute("aria-label", "Turn camera on");
       $("#cameraPrivacyStatus").textContent = error.name === "NotAllowedError"
         ? "Camera permission was denied or blocked. You can change this in your browser's site settings."
         : "No camera feed was started. No camera frames were received.";
@@ -473,6 +478,8 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     }
     $("#cameraViewfinder").classList.remove("has-camera");
     $("#cameraConnectBtn").textContent = "Turn camera on";
+    $("#cameraConnectBtn").setAttribute("aria-pressed", "false");
+    $("#cameraConnectBtn").setAttribute("aria-label", "Turn camera on");
     $("#cameraSource").value = "Not connected";
     $("#cameraPrivacyStatus").textContent = "Camera is off. PhoenixFramez has stopped the camera tracks; no live feed is active.";
     setCameraStatus("Camera is off. No live camera feed is active.", false);
