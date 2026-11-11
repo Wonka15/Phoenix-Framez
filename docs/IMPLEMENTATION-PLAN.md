@@ -62,7 +62,8 @@ Acceptance: all edits are frame-accurate, survive reload, are undoable, and work
 
 ## 5. Drawing, compositing and effects
 
-- [x] Previous captured still can be overlaid in the camera monitor with adjustable opacity.\n- [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
+- [x] Previous captured still can be overlaid in the camera monitor with adjustable opacity.
+- [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
 - [ ] Drawing tools with layers and non-destructive edits.
 - [ ] Text cards and speech bubbles.
 - [ ] Rotoscoping over imported video.
