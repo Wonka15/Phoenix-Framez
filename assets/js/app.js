@@ -28,7 +28,10 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 
   // ---------- Application state ----------
   const STORAGE_KEYS = { projects: "phoenixframe.projects", cues: "phoenixframe.cues", timeline: "phoenixframe.timeline", frames: "phoenixframe.frames" };
-  const storage = createStorage((error, operation) => {\n    console.warn("[PhoenixFrame] Storage " + operation + " failed:", error);\n    if (operation === "write") window.setTimeout(() => notify("Browser storage is full or unavailable. Export your project data."), 0);\n  });
+  const storage = createStorage((error, operation) => {
+    console.warn("[PhoenixFrame] Storage " + operation + " failed:", error);
+    if (operation === "write") window.setTimeout(() => notify("Browser storage is full or unavailable. Export your project data."), 0);
+  });
 
   const savedTimeline = normalizeTimeline(storage.read(STORAGE_KEYS.timeline, {}));
   const state = {
