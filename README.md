@@ -68,3 +68,10 @@ See [LICENSE](LICENSE).
 The current `ndev` interface includes a touch-friendly floating tool dock, visual project browser with locally saved project cards, a prototype timeline with playhead and draggable clips, a camera-station layout, and responsive iPad/mobile navigation.
 
 The camera station can request a browser camera feed over a secure context and capture stills where browser permissions and hardware allow. Toucan Camera Server is not connected yet. The timeline and project library are front-end prototypes; bidirectional Blender control still requires the separate local bridge and Blender adapter described in the integration documents. Do not treat roadmap integrations as active connections.
+
+
+## Code organization and implementation discipline
+
+The alpha keeps browser code dependency-free and separates responsibilities by clearly marked sections in `assets/js/app.js`: DOM/storage helpers, application state, navigation, project browser, timeline, lip-sync, camera station, portable export, event wiring and startup. Styles are grouped in `assets/css/style.css`; semantic workspace structure lives in `index.html`; architecture and delivery checklists live in `docs/`.
+
+New features should be implemented behind small functions with stable data IDs, safe text rendering, explicit storage behavior, keyboard/touch support and tests before being labelled complete. The project is being built in milestones; roadmap items must remain visibly marked as planned until their acceptance checks pass.
