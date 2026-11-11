@@ -112,7 +112,14 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     const hasFrame = Boolean(frame?.src);
     currentImage.hidden = !hasFrame;
     $("#animationStageEmpty").hidden = hasFrame;
-    if (hasFrame && currentImage.src !== frame.src) currentImage.src = frame.src;
+    if (hasFrame && currentImage.src !== frame.src) {
+      currentImage.onload = () => {
+        const stage = $("#animationStage");
+        if (currentImage.naturalWidth && currentImage.naturalHeight) stage.style.aspectRatio = currentImage.naturalWidth + " / " + currentImage.naturalHeight;
+      };
+      currentImage.src = frame.src;
+    }
+    if (!hasFrame) $("#animationStage").style.aspectRatio = "16 / 9";
     const previous = state.frames[state.selectedFrameIndex - 1];
     previousImage.hidden = !previous?.src || !$("#differenceModeToggle").checked;
     if (previous?.src && previousImage.src !== previous.src) previousImage.src = previous.src;
@@ -691,11 +698,11 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     try {
       const archive = validateProjectArchive(JSON.parse(await file.text()));
       if (!window.confirm("Import this archive and replace the current PhoenixFrame browser workspace?")) return;
-      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames; state.selectedFrameIndex = state.frames.length ? state.frames.length - 1 : -1;
+      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames; state.animationEdits = archive.animationEdits || {}; state.selectedFrameIndex = state.frames.length ? state.frames.length - 1 : -1;
       const timeline = normalizeTimeline(archive.timeline);
       state.markers = timeline.markers; state.tracks = timeline.tracks;
       storage.write(STORAGE_KEYS.projects, state.projects); storage.write(STORAGE_KEYS.cues, state.cues);
-      storage.write(STORAGE_KEYS.frames, state.frames); persistTimeline();
+      storage.write(STORAGE_KEYS.frames, state.frames); persistAnimationEdits(); persistTimeline();
       renderProjects(); renderCues(); renderTimeline(); if (state.frames.length) setFrame(state.frames.length); renderFrames(); notify("Project archive imported.");
     } catch (error) { console.warn("[PhoenixFrame] Archive import failed:", error); notify(error.message || "Could not import this project archive."); }
     finally { event.target.value = ""; }
