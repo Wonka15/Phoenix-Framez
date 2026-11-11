@@ -75,3 +75,10 @@ The camera station can request a browser camera feed over a secure context and c
 The alpha keeps browser code dependency-free and separates responsibilities by clearly marked sections in `assets/js/app.js`: DOM/storage helpers, application state, navigation, project browser, timeline, lip-sync, camera station, portable export, event wiring and startup. Styles are grouped in `assets/css/style.css`; semantic workspace structure lives in `index.html`; architecture and delivery checklists live in `docs/`.
 
 New features should be implemented behind small functions with stable data IDs, safe text rendering, explicit storage behavior, keyboard/touch support and tests before being labelled complete. The project is being built in milestones; roadmap items must remain visibly marked as planned until their acceptance checks pass.
+
+
+## Development and build checks
+
+PhoenixFrame uses native browser ES modules and has no runtime package dependencies. Install Node.js 22, then run `npm run check` to syntax-check every JavaScript module, run the unit tests, verify duplicate HTML IDs, and validate local module import paths. GitHub Actions runs the same checks on pushes to `ndev` and `main` and on pull requests to `main`.
+
+The studio is organized by feature under `assets/js/`: `core`, `projects`, `timeline`, `camera`, `animation`, `audio`, and `export`. `assets/js/app.js` remains the UI composition entry point. See `docs/IMPLEMENTATION-PLAN.md` for the full status and remaining acceptance tests.
