@@ -9,7 +9,8 @@ This document is the source of truth for feature status. A visual control or roa
 - [x] Responsive sidebar navigation with a mobile menu.
 - [x] Safe-area-aware touch navigation and reduced-motion/reduced-transparency fallbacks.
 - [ ] Complete iPad Safari usability pass in portrait and landscape.
-- [x] Basic animator keyboard shortcuts: Space playback, arrow-key frame stepping, C capture and Delete selected exposure.\n- [ ] Complete keyboard navigation and visible-focus audit for every workspace.
+- [x] Basic animator keyboard shortcuts: Space playback, arrow-key frame stepping, C capture and Delete selected exposure.
+- [ ] Complete keyboard navigation and visible-focus audit for every workspace.
 
 Acceptance: all navigation targets work at iPad, tablet, desktop and narrow-phone widths; controls remain reachable without overlapping content.
 
@@ -69,7 +70,8 @@ Acceptance: all edits are frame-accurate, survive reload, are undoable, and work
 
 - [x] Previous captured still can be overlaid in the camera monitor with adjustable opacity.
 - [ ] Next-frame ghosting and per-frame exposure-sheet onion skin.
-- [x] Per-frame non-destructive pen, line, arrow and eraser drawing layers.\n- [x] Undo and clear drawing operations for the current exposure.
+- [x] Per-frame non-destructive pen, line, arrow and eraser drawing layers.
+- [x] Undo and clear drawing operations for the current exposure.
 - [ ] Text cards and speech bubbles.
 - [ ] Rotoscoping over imported video.
 - [ ] Object removal / eraser and facial-expression overlays.
