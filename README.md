@@ -1,4 +1,4 @@
-# Eagle Companion 1.0
+# PhoenixFrame 1.0
 
 A browser-based studio companion for animation planning, timeline organization, and lip-sync cue sheets.
 
