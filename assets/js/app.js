@@ -35,9 +35,9 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 
   const savedTimeline = normalizeTimeline(storage.read(STORAGE_KEYS.timeline, {}));
   const state = {
-    projects: storage.read(STORAGE_KEYS.projects, []),
-    cues: storage.read(STORAGE_KEYS.cues, []),
-    frames: storage.read(STORAGE_KEYS.frames, []),
+    projects: Array.isArray(storage.read(STORAGE_KEYS.projects, [])) ? storage.read(STORAGE_KEYS.projects, []) : [],
+    cues: Array.isArray(storage.read(STORAGE_KEYS.cues, [])) ? storage.read(STORAGE_KEYS.cues, []) : [],
+    frames: Array.isArray(storage.read(STORAGE_KEYS.frames, [])) ? storage.read(STORAGE_KEYS.frames, []) : [],
     markers: savedTimeline.markers,
     tracks: savedTimeline.tracks,
     frame: 1,
