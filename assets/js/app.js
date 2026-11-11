@@ -11,6 +11,7 @@ import { createOnionSkin } from "./camera/onion-skin.js";
 import { createFrameSequence } from "./animation/frame-sequence.js";
 import { createAudioEngine } from "./audio/audio-engine.js";
 import { buildProjectArchive, validateProjectArchive, downloadJson } from "./export/project-archive.js";
+import { makeImageSequenceZip, downloadBlob } from "./export/image-sequence-zip.js";
 import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from "./animation/stop-motion.js";
 import { createAnimationTools, normalizeFrameEdits } from "./animation/animation-tools.js";
 
@@ -645,6 +646,43 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     notify("Interval capture started: every " + seconds + " seconds.");
   }
 
+  function exportZip(frames = state.frames) {
+    try { const blob=makeImageSequenceZip(frames); downloadBlob(blob,"phoenixframez-frames.zip"); notify("Image sequence ZIP downloaded."); }
+    catch(error) { notify(error.message); }
+  }
+
+  function loadDemoProject() {
+    const project=createProject({name:"The Little Phoenix — Demo",type:"Stop motion"});
+    const colors=["#ef8b55","#f6b86d","#f3d18b","#e7a66d","#cf7951","#a95d4b"];
+    const frames=colors.map((color,index)=>{
+      const canvas=document.createElement("canvas"); canvas.width=640; canvas.height=360;
+      const ctx=canvas.getContext("2d"); const bg=ctx.createLinearGradient(0,0,640,360); bg.addColorStop(0,"#20232b"); bg.addColorStop(1,"#4b3028");
+      ctx.fillStyle=bg;ctx.fillRect(0,0,640,360);ctx.fillStyle="#332b2a";ctx.fillRect(0,280,640,80);
+      const x=100+index*76,y=235-index*12;ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,34,48,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#fff3d8";ctx.beginPath();ctx.arc(x+12,y-12,6,0,Math.PI*2);ctx.fill();ctx.fillStyle="#29211d";ctx.beginPath();ctx.arc(x+14,y-12,2.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#ffd27e";ctx.beginPath();ctx.moveTo(x+27,y);ctx.lineTo(x+48,y+7);ctx.lineTo(x+27,y+12);ctx.fill();
+      return {id:makeId("demo-frame"),projectId:project.id,src:canvas.toDataURL("image/jpeg",.88),createdAt:new Date().toISOString(),source:"PhoenixFramez demo"};
+    });
+    state.projects.unshift(project);state.activeProjectId=project.id;state.frames=frames;state.cues=[{id:makeId("cue"),frame:1,shape:"MBP",note:"Hello!"},{id:makeId("cue"),frame:3,shape:"A / I",note:"Ah!"},{id:makeId("cue"),frame:5,shape:"Rest",note:""}];
+    state.selectedFrameIndex=0;state.playbackFps=12;$("#playbackFps").value="12";$("#captureFps").value="12 FPS";$("#cameraFpsReadout").textContent="12 FPS";$("#timelineFpsLabel").textContent="12 FPS";
+    storage.write(STORAGE_KEYS.projects,state.projects);storage.write(STORAGE_KEYS.cues,state.cues);renderProjects();renderCues();renderFrames();setFrame(1);renderTimeline();showView("camera");notify("Demo loaded — press Play to preview the six-frame animation.");
+  }
+
+  async function exportWebM() {
+    const frames=state.frames.filter(frame=>frame.src&&!frame.blank);
+    if(!frames.length)return notify("Capture or import frames before movie export.");
+    if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)return notify("WebM recording is not available in this browser. Export a ZIP image sequence instead.");
+    const first=new Image();first.src=frames[0].src;try{await first.decode();}catch{return notify("Could not read the first frame.");}
+    const canvas=document.createElement("canvas");canvas.width=first.naturalWidth;canvas.height=first.naturalHeight;const ctx=canvas.getContext("2d");
+    const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
+    if(!mime){stream.getTracks().forEach(t=>t.stop());return notify("This browser does not support WebM recording.");}
+    const recorder=new MediaRecorder(stream,{mimeType:mime}),chunks=[];recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
+    const done=new Promise(resolve=>recorder.onstop=resolve);recorder.start();
+    try{for(const frame of frames){const img=new Image();img.src=frame.src;await img.decode();ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);track.requestFrame?.();await new Promise(resolve=>setTimeout(resolve,1000/state.playbackFps));}
+      recorder.stop();await done;downloadBlob(new Blob(chunks,{type:mime}),"phoenixframez-animation.webm");notify("WebM exported at "+state.playbackFps+" FPS.");
+    }catch(error){if(recorder.state!=="inactive")recorder.stop();notify(error.message||"Movie export failed.");}finally{stream.getTracks().forEach(t=>t.stop());}
+  }
+
   // ---------- Portable project snapshot ----------
   function exportProject() {
     const payload = buildProjectArchive(state);
@@ -693,6 +731,11 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   $("#closeProjectExportBtn").addEventListener("click", () => { $("#projectExportPanel").hidden = true; });
   $("#exportSelectedArchiveBtn").addEventListener("click", exportSelectedProjectArchive);
   $("#exportSelectedFramesBtn").addEventListener("click", exportSelectedProjectFrames);
+  $("#exportSequenceZipBtn").addEventListener("click", () => { const project=state.projects.find(item=>item.id===state.selectedExportProjectId); exportZip(project?getExportFrames(project):state.frames); });
+  $("#exportWebmBtn").addEventListener("click", exportWebM);
+  $("#loadDemoBtn").addEventListener("click", loadDemoProject);
+  $("#helpButton").addEventListener("click", () => $("#shortcutsDialog").showModal());
+  $("#helpCloseBtn").addEventListener("click", () => $("#shortcutsDialog").close());
   $$(".view-toggle-btn").forEach(button => button.addEventListener("click", () => {
     $$(".view-toggle-btn").forEach(item => item.classList.toggle("active", item === button));
     state.projectLayout = button.dataset.projectLayout;
