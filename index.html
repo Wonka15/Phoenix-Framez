@@ -4,35 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#10131b">
-  <meta name="description" content="PhoenixFrame — a browser-based animation production companion for Eagle Animation, Toucan cameras, and independent creators.">
-  <title>PhoenixFrame 1.0</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="description" content="PhoenixFramez — a browser-based stop-motion animation production studio.">
+  <title>PhoenixFramez 1.0 — Stop-Motion Studio</title>
+  <link rel="stylesheet" href="assets/css/style.css">\n  <link rel="stylesheet" href="assets/css/phoenix-redesign.css">
   <script type="module" src="assets/js/app.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#" aria-label="PhoenixFrame home">
-        <span class="brand-mark">🦅</span>
-        <span><strong>PHOENIX</strong><small>FRAME 1.0</small></span>
+        <span class="brand-mark"><img src="assets/phoenix-mark.svg" alt=""></span>
+        <span><strong>PHOENIXFRAMEZ</strong><small>STOP-MOTION STUDIO</small></span>
       </a>
       <div class="workspace-label">WORKSPACE</div>
       <nav class="main-nav" aria-label="Main navigation">
-        <button class="nav-item active" data-view="overview"><span>▦</span> Overview</button>
-        <button class="nav-item" data-view="projects"><span>▧</span> Projects</button>
-        <button class="nav-item" data-view="timeline"><span>◷</span> Timeline</button>
-        <button class="nav-item" data-view="camera"><span>◎</span> Camera station</button>
-        <button class="nav-item" data-view="animation-tools"><span>✎</span> Animation tools</button>
-        <button class="nav-item" data-view="lipsync"><span>◖</span> Lip Sync</button>
-        <button class="nav-item" data-view="integrations"><span>⌘</span> Integrations</button>
+        <button class="nav-item active" data-view="overview"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg></span> Overview</button>
+        <button class="nav-item" data-view="projects"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span> Projects</button>
+        <button class="nav-item" data-view="timeline"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span> Timeline</button>
+        <button class="nav-item" data-view="camera"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span> Camera station</button>
+        <button class="nav-item" data-view="animation-tools"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5 4 16.5Z"/><path d="m13.8 6.7 3.5 3.5"/></svg></span> Animation tools</button>
+        <button class="nav-item" data-view="lipsync"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 4a9 9 0 1 0 0 16V4Z"/></svg></span> Lip Sync</button>
+        <button class="nav-item" data-view="integrations"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7V5a2 2 0 1 0-2 2h10a2 2 0 1 0-2-2v14a2 2 0 1 0 2-2H7a2 2 0 1 0 2 2V7Z"/></svg></span> Integrations</button>
       </nav>
       <div class="sidebar-bottom">
         <div class="connection-card">
           <span class="status-dot"></span>
           <div><strong>Local workspace</strong><small>Ready for your project</small></div>
         </div>
-        <a class="github-link" href="https://github.com/Wonka15/Eagle-Companion-" target="_blank" rel="noreferrer">↗ View on GitHub</a>
-        <span class="version">PHOENIXFRAME · ALPHA 0.1</span>
+        <a class="github-link" href="https://github.com/Wonka15/Phoenix-Framez" target="_blank" rel="noreferrer">↗ View on GitHub</a>
+        <span class="version">PHOENIXFRAMEZ · ALPHA 0.1</span>
       </div>
     </aside>
 
@@ -50,7 +50,7 @@
         </div>
         <div class="hero-card">
           <div class="hero-copy"><span class="pill">ANIMATION PRODUCTION STUDIO</span><h2>Bring every frame<br>into focus.</h2><p>Organize scenes and shots, prepare frame sequences, and move your production between your favorite animation tools.</p><button class="hero-btn" data-go="timeline">Open timeline <span>→</span></button></div>
-          <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="eagle-symbol">🦅</div><div class="spark spark-one">✦</div><div class="spark spark-two">✧</div></div>
+          <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="eagle-symbol">🐦‍🔥</div><div class="spark spark-one">✦</div><div class="spark spark-two">✧</div></div>
         </div>
         <div class="section-heading"><div><div class="eyebrow">AT A GLANCE</div><h2>Studio overview</h2></div><span class="muted tiny">Your browser workspace</span></div>
         <div class="stats-grid">
@@ -68,7 +68,7 @@
       <section class="view" id="projectsView">
         <div class="page-intro page-intro-row"><div><div class="eyebrow">YOUR PRODUCTIONS</div><h1>Project browser</h1><p class="muted">A visual home for every film, sequence and creative experiment.</p></div><button class="primary-btn" id="browserNewProject">＋ New project</button></div>
         <div class="browser-tools"><div class="search-wrap"><span>⌕</span><input id="projectSearch" type="search" placeholder="Find a project…" aria-label="Find a project"></div><div class="browser-actions"><button class="secondary-btn" id="importProjectBtn">Import project</button><input type="file" id="projectArchiveInput" accept=".json,application/json" hidden><div class="view-toggle"><button class="view-toggle-btn active" data-project-layout="grid">▦ Grid</button><button class="view-toggle-btn" data-project-layout="list">☷ List</button></div></div></div>
-        <div id="projectBrowserGrid" class="project-browser-grid"><div class="browser-empty"><span>▧</span><strong>Your next production starts here.</strong><p>Create a project to see it appear in your library.</p><button class="secondary-btn" id="browserEmptyCreate">Create project</button></div></div>
+        <div id="projectBrowserGrid" class="project-browser-grid"><div class="browser-empty"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span><strong>Your next production starts here.</strong><p>Create a project to see it appear in your library.</p><button class="secondary-btn" id="browserEmptyCreate">Create project</button></div></div>
       </section>
 
       <section class="view" id="timelineView">
@@ -138,7 +138,7 @@
         <div class="integration-grid">
           <article class="integration-card"><div class="integration-logo blender-logo">B</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Blender</h3><p>Bidirectional live sync: scrub the PhoenixFrame timeline and Blender follows; scrub Blender and PhoenixFrame follows. Exchange supported scene, frame, range and marker changes through the optional local bridge.</p><small class="muted">First targets: Blender 5.3 stable and 5.2 LTS · Local bridge required</small><button class="secondary-btn" disabled>Master controller planned</button></div></article>
           <article class="integration-card"><div class="integration-logo godot-logo">G</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Godot</h3><p>Coordinate animation timelines and scene workflow with Godot projects.</p><button class="secondary-btn" disabled>Integration in development</button></div></article>
-          <article class="integration-card"><div class="integration-logo eagle-logo">🦅</div><div class="integration-meta"><span class="pill planned">PLANNED BRIDGE</span><h3>Eagle Animation</h3><p>Exchange portable scene, shot, timing, and image-sequence data. Compatibility will be confirmed against real Eagle exports.</p><a class="secondary-btn link-button" href="https://github.com/brick-a-brack/eagle-animation" target="_blank" rel="noreferrer">View Eagle source ↗</a></div></article><article class="integration-card"><div class="integration-logo">📷</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Toucan Camera Server</h3><p>Optional local camera connection for live view, still capture, and supported camera settings through Toucan.</p><a class="secondary-btn link-button" href="https://github.com/brick-a-brack/toucan-camera-server" target="_blank" rel="noreferrer">View Toucan source ↗</a></div></article><article class="integration-card"><div class="integration-logo">🐍</div><div class="integration-meta"><span class="pill planned">OPTIONAL TOOL</span><h3>Python Companion</h3><p>Optional local helpers for batch image processing and production automation. Python will not be required to open PhoenixFrame.</p><button class="secondary-btn" disabled>Design planned</button></div></article>
+          <article class="integration-card"><div class="integration-logo eagle-logo">EA</div><div class="integration-meta"><span class="pill planned">PLANNED BRIDGE</span><h3>Eagle Animation</h3><p>Exchange portable scene, shot, timing, and image-sequence data. Compatibility will be confirmed against real Eagle exports.</p><a class="secondary-btn link-button" href="https://github.com/brick-a-brack/eagle-animation" target="_blank" rel="noreferrer">View Eagle source ↗</a></div></article><article class="integration-card"><div class="integration-logo">📷</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Toucan Camera Server</h3><p>Optional local camera connection for live view, still capture, and supported camera settings through Toucan.</p><a class="secondary-btn link-button" href="https://github.com/brick-a-brack/toucan-camera-server" target="_blank" rel="noreferrer">View Toucan source ↗</a></div></article><article class="integration-card"><div class="integration-logo">🐍</div><div class="integration-meta"><span class="pill planned">OPTIONAL TOOL</span><h3>Python Companion</h3><p>Optional local helpers for batch image processing and production automation. Python will not be required to open PhoenixFrame.</p><button class="secondary-btn" disabled>Design planned</button></div></article>
         </div>
         <div class="notice"><strong>Honest status:</strong> these are roadmap entries, not active connections. No integration is claimed as working until it has been implemented and tested.</div>
       </section>
