@@ -1,121 +1,35 @@
 (() => {
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => [...document.querySelectorAll(selector)];
-  const state = { projects: [], cues: [], markers: 0, tracks: 0 };
-  const dialog = $("#projectDialog");
-  const toast = $("#toast");
-  let toastTimer;
-
-  function notify(message) {
-    toast.textContent = message;
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
-  }
-
-  function showView(name) {
-    $$(".view").forEach(view => view.classList.remove("active-view"));
-    const target = document.getElementById(name + "View");
-    if (target) target.classList.add("active-view");
-    $$(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.view === name));
-    const label = name === "overview" ? "Overview" : name === "lipsync" ? "Lip Sync" : name[0].toUpperCase() + name.slice(1);
-    $("#pageName").textContent = label;
-    $("#sidebar").classList.remove("open");
-    window.scrollTo({top:0,behavior:"smooth"});
-  }
-
-  function openProjectDialog() {
-    $("#projectNameInput").value = "";
-    if (typeof dialog.showModal === "function") dialog.showModal();
-    else notify("Project creation requires a modern browser.");
-    $("#projectNameInput").focus();
-  }
-
-  function renderProjects() {
-    $("#projectCount").textContent = state.projects.length;
-    const list = $("#projectList");
-    if (!state.projects.length) {
-      list.className = "empty-state";
-      list.innerHTML = '<div class="empty-icon">▱</div><strong>No projects yet</strong><p>Create a project to start organizing your scenes and animation work.</p><button class="secondary-btn" id="emptyCreateBtn">Create your first project</button>';
-      $("#emptyCreateBtn").addEventListener("click", openProjectDialog);
-      return;
-    }
-    list.className = "";
-    list.innerHTML = state.projects.map((project, index) => `
-      <div class="project-list-item">
-        <div class="project-symbol">▣</div>
-        <div><strong>${escapeHtml(project.name)}</strong><small>${escapeHtml(project.type)} · Created just now</small></div>
-        <button class="project-open" data-project="${index}">Open</button>
-      </div>`).join("");
-    $$(".project-open").forEach(button => button.addEventListener("click", () => {
-      const project = state.projects[Number(button.dataset.project)];
-      $("#timelineProjectName").textContent = project.name;
-      showView("timeline");
-      notify("Workspace opened: " + project.name);
-    }));
-  }
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
-  }
-
-  function addCue() {
-    const frame = Math.max(0, Number($("#cueFrame").value) || 0);
-    const shape = $("#cueShape").value;
-    const note = $("#cueNote").value.trim();
-    state.cues.push({frame, shape, note});
-    state.cues.sort((a,b) => a.frame - b.frame);
-    $("#cueNote").value = "";
-    renderCues();
-    notify("Cue added at frame " + frame);
-  }
-
-  function renderCues() {
-    $("#cueCount").textContent = state.cues.length;
-    const list = $("#cueList");
-    if (!state.cues.length) {
-      list.innerHTML = '<div class="empty-state compact"><div class="empty-icon">◖</div><strong>No cues yet</strong><p>Add a cue to begin your mouth-shape sequence.</p></div>';
-      return;
-    }
-    list.innerHTML = state.cues.map((cue,index) => `
-      <div class="cue-item"><span class="cue-frame">FRAME ${cue.frame}</span><span class="cue-shape">${escapeHtml(cue.shape)} ${cue.note ? '<small class="cue-note">'+escapeHtml(cue.note)+'</small>' : ''}</span><button class="remove-cue" data-remove="${index}" aria-label="Remove cue">×</button></div>`).join("");
-    $$("[data-remove]").forEach(button => button.addEventListener("click", () => {
-      state.cues.splice(Number(button.dataset.remove),1);
-      renderCues();
-    }));
-  }
-
-  $$(".nav-item").forEach(button => button.addEventListener("click", () => showView(button.dataset.view)));
-  $$("[data-go]").forEach(button => button.addEventListener("click", () => showView(button.dataset.go)));
-  $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
-  $("#newProjectBtn").addEventListener("click", openProjectDialog);
-  $("#addProjectLink").addEventListener("click", openProjectDialog);
-  $("#emptyCreateBtn").addEventListener("click", openProjectDialog);
-  $("#projectForm").addEventListener("submit", event => {
-    if (event.submitter && event.submitter.value === "cancel") return;
-    event.preventDefault();
-    const name = $("#projectNameInput").value.trim();
-    if (!name) return;
-    state.projects.unshift({name,type:$("#projectTypeInput").value});
-    renderProjects();
-    dialog.close();
-    notify("Project created.");
-  });
-  $("#addCueBtn").addEventListener("click", addCue);
-  $("#cueFrame").addEventListener("keydown", event => { if(event.key === "Enter") addCue(); });
-  $("#addMarkerBtn").addEventListener("click", () => {
-    state.markers++;
-    $("#markerLabel").textContent = state.markers + (state.markers === 1 ? " marker added" : " markers added");
-    notify("Marker added to sequence.");
-  });
-  $("#addTrackBtn").addEventListener("click", () => {
-    state.tracks++;
-    const row = document.createElement("div");
-    row.className = "track-row";
-    row.innerHTML = '<div class="track-name">Track ' + (state.tracks + 3) + '</div><div class="track-lane"></div>';
-    $("#tracks").appendChild(row);
-    notify("Track added.");
-  });
-  renderProjects();
-  renderCues();
+ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+ const storage={read(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},write(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{notify("Browser storage is unavailable.")}}};
+ const state={projects:storage.read("phoenixframe.projects",[]),cues:storage.read("phoenixframe.cues",[]),markers:0,tracks:0,frame:1,playing:false,playTimer:null,projectLayout:"grid",cameraStream:null,frames:[]};
+ const dialog=$("#projectDialog"),toast=$("#toast");let toastTimer;
+ function notify(m){toast.textContent=m;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2400)}
+ function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+ function showView(n){$$(".view").forEach(v=>v.classList.remove("active-view"));const t=document.getElementById(n+"View");if(t)t.classList.add("active-view");$$(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===n));$$(".dock-tool[data-dock-view]").forEach(b=>b.classList.toggle("active",b.dataset.dockView===n));$("#pageName").textContent=n==="overview"?"Overview":n==="lipsync"?"Lip Sync":n==="camera"?"Camera station":n==="projects"?"Projects":n[0].toUpperCase()+n.slice(1);$("#sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"})}
+ function openDialog(){$("#projectNameInput").value="";if(dialog.showModal)dialog.showModal();else notify("Project creation requires a modern browser.");setTimeout(()=>$("#projectNameInput").focus(),50)}
+ function renderProjects(){const count=$("#projectCount");count.textContent=state.projects.length;const list=$("#projectList");if(!state.projects.length){list.className="empty-state";list.innerHTML='<div class="empty-icon">▱</div><strong>No projects yet</strong><p>Create a project to start organizing your scenes and animation work.</p><button class="secondary-btn" id="emptyCreateBtn">Create your first project</button>';$("#emptyCreateBtn").addEventListener("click",openDialog)}else{list.className="recent-project-list";list.innerHTML=state.projects.slice(0,3).map((p,i)=>'<div class="project-list-item"><div class="project-symbol">✦</div><div><strong>'+esc(p.name)+'</strong><small>'+esc(p.type)+' · '+esc(p.date||"New production")+'</small></div><button class="project-open" data-recent-open="'+i+'">Open</button></div>').join("");$$("[data-recent-open]").forEach(b=>b.addEventListener("click",()=>openProject(+b.dataset.recentOpen)))}renderBrowser()}
+ function renderBrowser(){const grid=$("#projectBrowserGrid");if(!grid)return;const q=($("#projectSearch").value||"").trim().toLowerCase(),matches=state.projects.map((p,i)=>({p,i})).filter(x=>(x.p.name+" "+x.p.type).toLowerCase().includes(q));grid.classList.toggle("list-layout",state.projectLayout==="list");if(!matches.length){grid.innerHTML=q?'<div class="browser-empty"><span>⌕</span><strong>No matching projects</strong><p>Try another project name or type.</p></div>':'<div class="browser-empty"><span>▧</span><strong>Your next production starts here.</strong><p>Create a project to see it appear in your library.</p><button class="secondary-btn" id="browserEmptyCreate">Create project</button></div>';$("#browserEmptyCreate")?.addEventListener("click",openDialog);return}const glyphs=["✦","◈","◉","▱","✧","⬡"],pal=["thumb-violet","thumb-blue","thumb-amber","thumb-rose"];grid.innerHTML=matches.map(x=>'<article class="project-card"><div class="project-thumb '+pal[x.i%4]+'"><span class="thumb-index">PROJECT '+String(x.i+1).padStart(2,"0")+'</span><span class="thumb-glyph">'+glyphs[x.i%6]+'</span></div><div class="project-card-body"><h3>'+esc(x.p.name)+'</h3><p>'+esc(x.p.type)+' · '+esc(x.p.date||"New production")+'</p><div class="project-card-foot"><small>120 FRAME SEQUENCE</small><button data-open-project="'+x.i+'">Open project ↗</button></div></div></article>').join("");$$("[data-open-project]").forEach(b=>b.addEventListener("click",()=>openProject(+b.dataset.openProject)))}
+ function openProject(i){const p=state.projects[i];if(!p)return;$("#timelineProjectName").textContent=p.name;showView("timeline");notify("Workspace opened: "+p.name)}
+ function renderCues(){$("#cueCount").textContent=state.cues.length;const list=$("#cueList");if(!state.cues.length){list.innerHTML='<div class="empty-state compact"><div class="empty-icon">◖</div><strong>No cues yet</strong><p>Add a cue to begin your mouth-shape sequence.</p></div>';return}list.innerHTML=state.cues.map((c,i)=>'<div class="cue-item"><span class="cue-frame">FRAME '+c.frame+'</span><span class="cue-shape">'+esc(c.shape)+' '+(c.note?'<small class="cue-note">'+esc(c.note)+'</small>':'')+'</span><button class="remove-cue" data-remove-cue="'+i+'" aria-label="Remove cue">×</button></div>').join("");$$("[data-remove-cue]").forEach(b=>b.addEventListener("click",()=>{state.cues.splice(+b.dataset.removeCue,1);storage.write("phoenixframe.cues",state.cues);renderCues()}))}
+ function setFrame(v){state.frame=Math.max(0,Math.min(120,Math.round(+v||0)));$("#frameScrubber").value=state.frame;$("#currentFrameLabel").textContent="Frame "+String(state.frame).padStart(3,"0");$("#scrubberValue").textContent=String(state.frame).padStart(3,"0")}
+ function stopPlayback(){state.playing=false;clearInterval(state.playTimer);state.playTimer=null;$("#playTimeline").textContent="▶";$("#playTimeline").setAttribute("aria-label","Play timeline")}
+ function togglePlayback(){if(state.playing){stopPlayback();return}state.playing=true;$("#playTimeline").textContent="Ⅱ";$("#playTimeline").setAttribute("aria-label","Pause timeline");state.playTimer=setInterval(()=>setFrame(state.frame>=120?0:state.frame+1),1000/24)}
+ function addTrack(){state.tracks++;const r=document.createElement("div");r.className="track-row";r.innerHTML='<div class="track-name">Track '+(state.tracks+3)+'</div><div class="track-lane"></div>';$("#tracks").appendChild(r);notify("Track added.")}
+ function addMarker(){state.markers++;$("#markerLabel").textContent=state.markers+(state.markers===1?" marker added":" markers added");const m=document.createElement("span");m.className="timeline-marker";m.style.left=(state.frame/120*100)+"%";m.title="Marker at frame "+state.frame;$("#tracks .track-lane")?.appendChild(m);notify("Marker added at frame "+state.frame+".")}
+ function bindClips(){$$(".clip").forEach(c=>c.addEventListener("pointerdown",e=>{if(e.button!==0)return;const lane=c.parentElement,rect=lane.getBoundingClientRect(),x=e.clientX,left=parseFloat(c.style.left)||0;c.setPointerCapture(e.pointerId);c.classList.add("dragging");const move=ev=>{const width=parseFloat(c.style.width)||10;c.style.left=Math.max(0,Math.min(100-width,left+(ev.clientX-x)/rect.width*100))+"%"};const end=()=>{c.classList.remove("dragging");c.removeEventListener("pointermove",move);c.removeEventListener("pointerup",end);c.removeEventListener("pointercancel",end)};c.addEventListener("pointermove",move);c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end)}))}
+ async function connectCamera(){if(!navigator.mediaDevices?.getUserMedia){notify("Camera access is unavailable in this browser or page context.");return}try{state.cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});let v=$("#cameraVideo");if(!v){v=document.createElement("video");v.id="cameraVideo";v.autoplay=true;v.playsInline=true;v.muted=true;$("#cameraViewfinder").prepend(v)}v.srcObject=state.cameraStream;$("#cameraViewfinder").classList.add("has-camera");$("#cameraConnectBtn").textContent="Disconnect camera";$("#cameraSource").value="Local camera (browser permission)";$(".preview-pill").innerHTML="<i></i> LIVE CAMERA";notify("Camera connected.")}catch(e){notify(e.name==="NotAllowedError"?"Camera permission was denied.":"Could not connect to a camera.")}}
+ function disconnectCamera(){state.cameraStream?.getTracks().forEach(t=>t.stop());state.cameraStream=null;$("#cameraVideo")?.remove();$("#cameraViewfinder").classList.remove("has-camera");$("#cameraConnectBtn").textContent="Connect camera";$(".preview-pill").innerHTML="<i></i> PREVIEW MOCKUP";$("#cameraSource").value="Not connected";notify("Camera disconnected.")}
+ function renderFrames(){$("#frameCount").textContent=state.frames.length+" FRAMES";$("#frameLibrary").innerHTML=state.frames.length?state.frames.map((src,i)=>'<img class="frame-thumb" src="'+src+'" alt="Captured frame '+(i+1)+'">').join(""):'<div class="frame-empty">Your captured frames will appear here.</div>'}
+ function captureFrame(){const v=$("#cameraVideo");if(!v||!v.videoWidth){notify("Connect a camera or import a still to add a frame.");return}const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);state.frames.unshift(c.toDataURL("image/jpeg",.82));renderFrames();notify("Still captured.")}
+ $$(".nav-item").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));$$("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));$$("[data-dock-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.dockView)));$("#dockCreate").addEventListener("click",openDialog);$("#menuToggle").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
+ $("#newProjectBtn").addEventListener("click",openDialog);$("#addProjectLink").addEventListener("click",openDialog);$("#browserNewProject").addEventListener("click",openDialog);
+ $("#projectForm").addEventListener("submit",e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const name=$("#projectNameInput").value.trim();if(!name)return;state.projects.unshift({name,type:$("#projectTypeInput").value,date:new Date().toLocaleDateString()});storage.write("phoenixframe.projects",state.projects);renderProjects();dialog.close();showView("projects");notify("Project created.")});
+ $("#projectSearch").addEventListener("input",renderBrowser);$$(".view-toggle-btn").forEach(b=>b.addEventListener("click",()=>{$$(".view-toggle-btn").forEach(x=>x.classList.toggle("active",x===b));state.projectLayout=b.dataset.projectLayout;renderBrowser()}));
+ $("#addCueBtn").addEventListener("click",()=>{const frame=Math.max(0,+$("#cueFrame").value||0);state.cues.push({frame,shape:$("#cueShape").value,note:$("#cueNote").value.trim()});state.cues.sort((a,b)=>a.frame-b.frame);$("#cueNote").value="";storage.write("phoenixframe.cues",state.cues);renderCues();notify("Cue added at frame "+frame)});$("#cueFrame").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addCueBtn").click()});
+ $("#addMarkerBtn").addEventListener("click",addMarker);$("#addTrackBtn").addEventListener("click",addTrack);$("#frameScrubber").addEventListener("input",e=>{stopPlayback();setFrame(e.target.value)});$("#playTimeline").addEventListener("click",togglePlayback);
+ $("#cameraConnectBtn").addEventListener("click",()=>state.cameraStream?disconnectCamera():connectCamera());$("#shutterBtn").addEventListener("click",captureFrame);$("#cameraImportBtn").addEventListener("click",()=>$("#cameraFileInput").click());
+ $("#cameraFileInput").addEventListener("change",e=>{[...e.target.files].forEach(file=>{if(!file.type.startsWith("image/"))return;const reader=new FileReader();reader.onload=()=>{state.frames.unshift(reader.result);renderFrames()};reader.readAsDataURL(file)});e.target.value=""});
+ $("#onionToggle").addEventListener("change",e=>$("#cameraViewfinder").classList.toggle("onion-enabled",e.target.checked));$("#onionOpacity").addEventListener("input",e=>$("#cameraViewfinder").style.setProperty("--onion-opacity",+e.target.value/100));
+ window.addEventListener("pagehide",()=>state.cameraStream?.getTracks().forEach(t=>t.stop()));
+ renderProjects();renderCues();bindClips();setFrame(1);
 })();
