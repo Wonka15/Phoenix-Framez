@@ -6,7 +6,7 @@ import { buildProjectArchive, validateProjectArchive } from "../assets/js/export
 
 test("timeline normalizes invalid frame positions and missing track data", () => {
   const timeline = normalizeTimeline({ tracks: [{ id: "a", name: "Camera", clips: [{ id: "c", start: 999, duration: 20 }] }], markers: [{ name: "Cut", frame: -8 }] });
-  assert.equal(timeline.tracks[0].clips[0].start, 120);
+  assert.equal(timeline.tracks[0].clips[0].start, 100);
   assert.equal(timeline.markers[0].frame, 0);
   assert.equal(timeline.tracks[0].clips[0].color, "blue");
 });
