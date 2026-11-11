@@ -87,3 +87,12 @@ input:focus,select:focus{border-color:#e99462;box-shadow:0 0 0 3px rgba(233,148,
  .browser-tools{align-items:stretch;flex-direction:column}
 }
 @media(prefers-reduced-transparency:reduce){.sidebar,.stat-card,.panel,.integration-card,.floating-dock{backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+/* Keep one navigation system; the sidebar is the primary navigation. */
+.floating-toolbar,.floating-dock{display:none!important}
+svg{width:16px;height:16px;vertical-align:middle}
+@media(max-width:700px){
+  .sidebar{z-index:40}
+  .main-content{padding-bottom:24px}
+  .mobile-menu{min-width:42px;min-height:42px;color:#ffe2cb;border-color:rgba(255,190,145,.2)}
+}
