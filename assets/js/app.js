@@ -361,6 +361,13 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   }
 
   function disconnectCamera() {
+    // A disconnected camera must never leave a background interval-capture timer running.
+    if (state.intervalTimer) {
+      window.clearInterval(state.intervalTimer);
+      state.intervalTimer = null;
+      state.intervalRunning = false;
+      $("#intervalCaptureBtn").textContent = "Start interval";
+    }
     state.cameraStream?.getTracks().forEach(track => track.stop());
     state.cameraStream = null;
     $("#cameraVideo")?.remove();
@@ -581,7 +588,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     event.target.value = "";
   });
   $("#onionToggle").addEventListener("change", event => onionSkin.setEnabled(event.target.checked));
-  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; });
+  $("#captureFps").addEventListener("change", event => { state.playbackFps = normalizeFps(event.target.value); $("#playbackFps").value = String(state.playbackFps); $("#cameraFpsReadout").textContent = state.playbackFps + " FPS"; $("#timelineFpsLabel").textContent = state.playbackFps + " FPS"; });
   $("#aspectRatioSelect").addEventListener("change", event => { $("#cameraViewfinder").dataset.aspect = event.target.value; $("#cameraAspectReadout").textContent = event.target.value; });
   $("#gridGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-grid", event.target.checked));
   $("#safeGuideToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("guide-safe", event.target.checked));
@@ -591,6 +598,12 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   $("#onionOpacity").addEventListener("input", event => onionSkin.setOpacity(event.target.value));
   onionSkin.setEnabled($("#onionToggle").checked);
   onionSkin.setOpacity($("#onionOpacity").value);
+  $("#cameraViewfinder").classList.toggle("guide-grid", $("#gridGuideToggle").checked);
+  $("#cameraViewfinder").classList.toggle("guide-safe", $("#safeGuideToggle").checked);
+  $("#cameraViewfinder").classList.toggle("guide-mask", $("#maskGuideToggle").checked);
+  $("#cameraViewfinder").dataset.aspect = $("#aspectRatioSelect").value;
+  $("#cameraFpsReadout").textContent = state.playbackFps + " FPS";
+  $("#timelineFpsLabel").textContent = state.playbackFps + " FPS";
 
   window.addEventListener("pagehide", () => {
     stopPlayback();
