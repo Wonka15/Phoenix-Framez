@@ -5,7 +5,7 @@
 import { $, $$, escapeHTML, makeId } from "./core/dom.js";
 import { createStorage } from "./core/storage.js";
 import { makeCoverThumbnail, createProject } from "./projects/project-store.js";
-import { DEFAULT_TRACKS, normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "./timeline/timeline-model.js";
+import { normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "./timeline/timeline-model.js";
 import { createOnionSkin } from "./camera/onion-skin.js";
 import { createFrameSequence } from "./animation/frame-sequence.js";
 import { createAudioEngine } from "./audio/audio-engine.js";
@@ -28,19 +28,15 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 
   // ---------- Application state ----------
   const STORAGE_KEYS = { projects: "phoenixframe.projects", cues: "phoenixframe.cues", timeline: "phoenixframe.timeline", frames: "phoenixframe.frames" };
-  const storage = createStorage(() => notify("Browser storage is full or unavailable. Export your project data."));
+  const storage = createStorage((error, operation) => {\n    console.warn("[PhoenixFrame] Storage " + operation + " failed:", error);\n    if (operation === "write") window.setTimeout(() => notify("Browser storage is full or unavailable. Export your project data."), 0);\n  });
 
   const savedTimeline = normalizeTimeline(storage.read(STORAGE_KEYS.timeline, {}));
   const state = {
     projects: storage.read(STORAGE_KEYS.projects, []),
     cues: storage.read(STORAGE_KEYS.cues, []),
     frames: storage.read(STORAGE_KEYS.frames, []),
-    markers: Array.isArray(savedTimeline.markers) ? savedTimeline.markers : [],
-    tracks: Array.isArray(savedTimeline.tracks) ? savedTimeline.tracks : [
-      { id: "camera", name: "Camera", clips: [{ id: "opening", label: "Opening shot", start: 2, duration: 30, color: "purple" }] },
-      { id: "animation", name: "Animation", clips: [{ id: "blocking", label: "Character blocking", start: 18, duration: 38, color: "blue" }] },
-      { id: "audio", name: "Audio", clips: [{ id: "scratch-audio", label: "Scratch audio", start: 3, duration: 65, color: "amber" }] }
-    ],
+    markers: savedTimeline.markers,
+    tracks: savedTimeline.tracks,
     frame: 1,
     playing: false,
     playTimer: null,
