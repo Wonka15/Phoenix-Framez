@@ -397,3 +397,5 @@ input::placeholder{color:#77839a}
 .camera-viewfinder.show-animation-frame .viewfinder-center{display:none}
 .camera-viewfinder.show-animation-frame #animationPreviewFrame{display:block}
 .camera-viewfinder.capture-blackout #animationPreviewFrame{visibility:hidden}
+
+.camera-viewfinder.show-animation-frame #animationPreviewFrame[hidden]{display:none}
