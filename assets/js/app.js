@@ -179,7 +179,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
 
   function setFrame(value) {
     // Animator-facing frame numbers are 1-based; array indices remain 0-based.
-    const maxFrame = Math.max(120, state.frames.length);
+    const maxFrame = state.frames.length || 120;
     state.frame = Math.max(1, Math.min(maxFrame, Math.round(Number(value) || 1)));
     state.selectedFrameIndex = state.frames.length ? Math.min(state.frames.length - 1, state.frame - 1) : -1;
     $("#frameScrubber").max = maxFrame;
@@ -396,7 +396,7 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     $("[data-frame-index]").forEach(button => button.addEventListener("click", () => { setMonitorMode("animation"); setFrame(Number(button.dataset.frameIndex) + 1); }));
     syncFrameSelection();
     storage.write(STORAGE_KEYS.frames, state.frames);
-    $("#frameScrubber").max = Math.max(120, state.frames.length);
+    $("#frameScrubber").max = state.frames.length || 120;
   }
 
   function captureFrame() {
@@ -538,15 +538,15 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
   });
   $("#pasteFrameBtn").addEventListener("click", () => {
     if (!frameSequence.paste(state.selectedFrameIndex + 1)) return notify("Copy a frame before pasting.");
-    state.frames = frameSequence.frames; state.selectedFrameIndex += 1; renderFrames(); notify("Frame pasted.");
+    state.frames = frameSequence.frames; state.selectedFrameIndex += 1; setFrame(state.selectedFrameIndex + 1); renderFrames(); notify("Frame pasted.");
   });
   $("#insertBlankFrameBtn").addEventListener("click", () => {
     frameSequence.insertBlank(state.selectedFrameIndex < 0 ? state.frames.length : state.selectedFrameIndex + 1);
-    state.frames = frameSequence.frames; state.selectedFrameIndex = Math.max(0, state.selectedFrameIndex + 1); renderFrames(); notify("Blank frame inserted.");
+    state.frames = frameSequence.frames; state.selectedFrameIndex = Math.max(0, state.selectedFrameIndex + 1); setFrame(state.selectedFrameIndex + 1); renderFrames(); notify("Blank frame inserted.");
   });
   $("#deleteFrameBtn").addEventListener("click", () => {
     if (!frameSequence.remove(state.selectedFrameIndex)) return notify("Select a frame to delete first.");
-    state.frames = frameSequence.frames; state.selectedFrameIndex = -1; renderFrames(); notify("Frame deleted.");
+    state.frames = frameSequence.frames; state.selectedFrameIndex = Math.min(state.selectedFrameIndex, state.frames.length - 1); if (state.selectedFrameIndex >= 0) setFrame(state.selectedFrameIndex + 1); else state.frame = 1; renderFrames(); notify("Frame deleted.");
   });
   $("#audioImportBtn").addEventListener("click", () => $("#audioFileInput").click());
   $("#audioFileInput").addEventListener("change", event => {
@@ -564,12 +564,12 @@ import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from ".
     try {
       const archive = validateProjectArchive(JSON.parse(await file.text()));
       if (!window.confirm("Import this archive and replace the current PhoenixFrame browser workspace?")) return;
-      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames;
+      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames; state.selectedFrameIndex = state.frames.length ? state.frames.length - 1 : -1;
       const timeline = normalizeTimeline(archive.timeline);
       state.markers = timeline.markers; state.tracks = timeline.tracks;
       storage.write(STORAGE_KEYS.projects, state.projects); storage.write(STORAGE_KEYS.cues, state.cues);
       storage.write(STORAGE_KEYS.frames, state.frames); persistTimeline();
-      renderProjects(); renderCues(); renderTimeline(); renderFrames(); notify("Project archive imported.");
+      renderProjects(); renderCues(); renderTimeline(); if (state.frames.length) setFrame(state.frames.length); renderFrames(); notify("Project archive imported.");
     } catch (error) { console.warn("[PhoenixFrame] Archive import failed:", error); notify(error.message || "Could not import this project archive."); }
     finally { event.target.value = ""; }
   });
