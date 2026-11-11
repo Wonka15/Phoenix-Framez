@@ -94,3 +94,8 @@ Run `npm run build` to run all quality checks and create the deployable GitHub P
 The primary workflow is frame-first: connect a browser-supported camera, capture or import still exposures, select them in the exposure sheet, compare live view against the previous exposure, step frame-by-frame, and preview at 12, 15, 24, 25 or 30 FPS. Playback supports looping and a last-12-frames short preview. Camera tools include grid/safe-area/aspect-mask guides, monitor blackout and basic interval capture.
 
 Manual DSLR controls, Toucan integration, vector drawing/rotoscoping, multitrack audio, DMX/motion-control hardware and final movie rendering are not yet implemented; see the implementation plan for the verified scope.
+
+
+## Animation tools
+
+The Animation tools workspace adds per-frame non-destructive drawing (pen, line, arrow and eraser), editable motion-path guides, reference-image overlays with opacity control, previous-exposure difference comparison, undo and clear. Overlay data is stored separately from source photographs, saved locally, and included in exported project archives. This is a guide/annotation workspace rather than a finished compositing or movie-rendering system.
