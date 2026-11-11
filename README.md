@@ -1,101 +1,60 @@
-# PhoenixFrame 1.0 — Animation Production Studio
+# PhoenixFramez
 
-PhoenixFrame is an independent, browser-based production companion for stop-motion and other frame-based animation workflows. It is designed to complement Eagle Animation while remaining useful as a standalone studio.
+**A browser-based stop-motion production studio.** Capture stills, build a frame library, compare exposures with onion skin, and play your animation at a chosen frame rate.
 
-## Product direction
+[Open the live studio](https://wonka15.github.io/Phoenix-Framez/) · [Source code](https://github.com/Wonka15/Phoenix-Framez/tree/ndev)
 
-- **PhoenixFrame:** production planning, scenes, shots, takes, timing, frame organization and interchange.
-- **Eagle Animation:** animation editing, playback and finishing.
-- **Toucan Camera Server:** optional camera connection through its local API.
-- **Master Application Controller:** coordinates supported desktop tools through optional, secure local adapters; Blender is the first target.
-- **Python companion:** optional local image processing and production automation.
+![PhoenixFramez social preview](assets/social-preview.svg)
 
-The PhoenixFrame website is intended to run as static HTML, CSS and JavaScript on GitHub Pages. Toucan and Python are separate optional local services; GitHub Pages does not run those services.
+## Try it
 
-## Current status
+1. Open the live studio over HTTPS.
+2. Choose **Load demo project** to explore without a camera.
+3. Open **Camera station**, allow camera access, and capture a few stills (or import images).
+4. Select exposures in the frame library and play them at 12, 15, 24, 25 or 30 FPS.
+5. Export a portable JSON project, a ZIP image sequence, or a WebM recording when supported by the browser.
 
-**Alpha 0.1 — initial web interface**
+## Current features
 
-- Responsive studio dashboard
-- Browser-session project creation
-- Timeline planning prototype with add-track and marker controls
-- Lip-sync cue sheet with add/remove controls
-- Integration roadmap for Eagle Animation, Toucan, Blender, Godot and optional Python tools
+- Browser camera capture with explicit permission and camera-off controls.
+- Import still images, reorder/select exposures, copy/paste/delete and blank frames.
+- Onion-skin comparison, composition guides and a frame-rate playback timeline.
+- IndexedDB-backed frame storage, with migration from older local browser storage.
+- JSON project export/import (image data is embedded in the project file).
+- ZIP image-sequence export and browser-supported WebM movie export.
+- Demo animation, drawing/reference overlays, lip-sync cue sheet and keyboard help.
+- Responsive studio layout with touch-friendly capture controls.
 
-The current interface is a prototype. Project persistence, portable project files, camera capture and external application integrations are not yet implemented.
+## Known limitations (alpha)
 
-## Development branches
+- **MP4 and GIF export are not implemented.** WebM is available only where MediaRecorder and canvas capture are supported. ZIP image sequences are the most portable export.
+- Browser storage can be cleared by the user or browser. Export project backups regularly.
+- Large projects may use substantial browser storage and memory; image imports are resized for more practical use.
+- Camera support depends on HTTPS, browser permissions, device drivers and camera capabilities. Manual ISO, shutter, focus and white balance are not universal.
+- Front/back camera selection is offered on mobile; some browsers may expose only a single camera choice.
+- Drawing and reference layers are browser-side project data; advanced compositing and audio-mixed movie rendering are not included.
+- Blender, Godot, Eagle Animation, Audacity and Toucan Camera Server connections are roadmap items, not active bidirectional integrations.
+- The live site is an alpha and still needs broad testing across iOS Safari, Android Chrome and desktop browsers.
 
-- `main` — stable releases
-- `ndev` — active development
+## Local development
 
-## Run locally
+This is a static site using native browser ES modules. Serve the repository over localhost (camera APIs require a secure context):
 
-This is a static website. Open `index.html` in a browser, or serve the repository folder with any static HTTP server.
+```bash
+npm install
+npm run check
+npm run build
+```
 
-## GitHub Pages
+Then serve the repository or the generated `dist/` folder with a local static HTTP server.
 
-The workflow in `.github/workflows/pages.yml` deploys the site when changes are pushed to `ndev`. In repository Settings → Pages, set the build and deployment source to **GitHub Actions** if it is not already selected.
+## Branches and releases
 
-## Roadmap
+- `main` — stable release branch.
+- `ndev` — active development branch.
 
-1. Define and implement a versioned PhoenixFrame project manifest.
-2. Add project save/load and portable export/import.
-3. Inspect Eagle Animation's real project and interchange formats; build a tested file-based bridge.
-4. Connect to Toucan Camera Server through its documented API, subject to browser security and network compatibility.
-5. Add an optional Python companion for local image processing and production automation.
-6. Evaluate Blender and Godot integrations.
-7. Add automated tests and publish compatibility notes.
-
-## Master Application Controller
-
-PhoenixFrame is intended to act as the production hub for supported third-party applications, with bidirectional live synchronization for supported properties. For example, scrubbing in PhoenixFrame can move Blender's playhead, and scrubbing in Blender can update PhoenixFrame. The GitHub Pages site cannot directly control native desktop applications; this requires an optional local bridge running on the creator's computer. The bridge will use paired, allowlisted adapters rather than arbitrary shell or script execution. Blender is the first planned adapter. See [Master Application Controller](docs/MASTER-APPLICATION-CONTROLLER.md) for the design, security boundaries, Blender version targets and implementation milestones.
-
-## Integration and licensing boundaries
-
-PhoenixFrame should integrate with Eagle Animation and Toucan through documented APIs and portable file formats. This repository must not copy their source code or assets. Eagle Animation and Toucan Camera Server are GPL-3.0 projects, while this repository currently declares MIT; review licensing before distributing combined or derivative software. See [the integration architecture](docs/INTEGRATION-ARCHITECTURE.md).
-
-## Important
-
-Eagle Animation, Toucan, Python, Blender and Godot integrations are planned, not currently working features. No automatic synchronization, camera control or benchmark is claimed until implemented and tested.
+Changes are developed and checked on `ndev`. Promote to `main` only after the core capture, storage, playback, import and export workflow passes browser testing.
 
 ## License
 
-See [LICENSE](LICENSE).
-
-## Studio interface status
-
-The current `ndev` interface includes a touch-friendly floating tool dock, visual project browser with locally saved project cards, a prototype timeline with playhead and draggable clips, a camera-station layout, and responsive iPad/mobile navigation.
-
-The camera station can request a browser camera feed over a secure context and capture stills where browser permissions and hardware allow. Toucan Camera Server is not connected yet. The timeline and project library are front-end prototypes; bidirectional Blender control still requires the separate local bridge and Blender adapter described in the integration documents. Do not treat roadmap integrations as active connections.
-
-
-## Code organization and implementation discipline
-
-The alpha keeps browser code dependency-free and separates responsibilities by clearly marked sections in `assets/js/app.js`: DOM/storage helpers, application state, navigation, project browser, timeline, lip-sync, camera station, portable export, event wiring and startup. Styles are grouped in `assets/css/style.css`; semantic workspace structure lives in `index.html`; architecture and delivery checklists live in `docs/`.
-
-New features should be implemented behind small functions with stable data IDs, safe text rendering, explicit storage behavior, keyboard/touch support and tests before being labelled complete. The project is being built in milestones; roadmap items must remain visibly marked as planned until their acceptance checks pass.
-
-
-## Development and build checks
-
-PhoenixFrame uses native browser ES modules and has no runtime package dependencies. Install Node.js 22, then run `npm run check` to syntax-check every JavaScript module, run the unit tests, verify duplicate HTML IDs, and validate local module import paths. GitHub Actions runs the same checks on pushes to `ndev` and `main` and on pull requests to `main`.
-
-The studio is organized by feature under `assets/js/`: `core`, `projects`, `timeline`, `camera`, `animation`, `audio`, and `export`. `assets/js/app.js` remains the UI composition entry point. See `docs/IMPLEMENTATION-PLAN.md` for the full status and remaining acceptance tests.
-
-
-## Static build
-
-Run `npm run build` to run all quality checks and create the deployable GitHub Pages site in `dist/`. The build copies the HTML and native ES modules without a bundler or runtime dependencies. GitHub Pages deploys the generated `dist/` directory from the `ndev` branch workflow.
-
-
-## Stop-motion workflow
-
-The primary workflow is frame-first: connect a browser-supported camera, capture or import still exposures, select them in the exposure sheet, compare live view against the previous exposure, step frame-by-frame, and preview at 12, 15, 24, 25 or 30 FPS. Playback supports looping and a last-12-frames short preview. Camera tools include grid/safe-area/aspect-mask guides, monitor blackout and basic interval capture.
-
-Manual DSLR controls, Toucan integration, vector drawing/rotoscoping, multitrack audio, DMX/motion-control hardware and final movie rendering are not yet implemented; see the implementation plan for the verified scope.
-
-
-## Animation tools
-
-The Animation tools workspace adds per-frame non-destructive drawing (pen, line, arrow and eraser), editable motion-path guides, reference-image overlays with opacity control, previous-exposure difference comparison, undo and clear. Overlay data is stored separately from source photographs, saved locally, and included in exported project archives. This is a guide/annotation workspace rather than a finished compositing or movie-rendering system.
+MIT. See [LICENSE](LICENSE).
