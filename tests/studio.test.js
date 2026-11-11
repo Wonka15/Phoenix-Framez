@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "../assets/js/timeline/timeline-model.js";
 import { createFrameSequence } from "../assets/js/animation/frame-sequence.js";
 import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from "../assets/js/animation/stop-motion.js";
+import { normalizeFrameEdits, addAnnotationStroke, addMotionPoint, undoFrameEdit, clearFrameEdit } from "../assets/js/animation/animation-tools.js";
 import { buildProjectArchive, validateProjectArchive } from "../assets/js/export/project-archive.js";
 
 test("timeline normalizes invalid frame positions and missing track data", () => {
@@ -52,4 +53,28 @@ test("onion skin uses the previous captured exposure, never the selected one", (
   const frames = [{src:"one"}, {src:"two"}, {src:"three"}];
   assert.equal(previousFrameSource(frames, 2), "two");
   assert.equal(previousFrameSource(frames, 0), "");
+});
+
+
+test("animation annotations remain normalized, editable data separate from source frames", () => {
+  const original = { strokes: [], motionPath: [], reference: "", referenceOpacity: 0.35 };
+  const annotated = addAnnotationStroke(original, {
+    type: "arrow", color: "#ffcf83", width: 5,
+    points: [{ x: -1, y: 0.2 }, { x: 1.4, y: 0.8 }]
+  });
+  assert.equal(original.strokes.length, 0);
+  assert.equal(annotated.strokes.length, 1);
+  assert.deepEqual(annotated.strokes[0].points, [{ x: 0, y: 0.2 }, { x: 1, y: 0.8 }]);
+  assert.equal(normalizeFrameEdits({ strokes: [{ type: "script", points: [] }] }).strokes.length, 0);
+});
+
+test("motion paths support point addition, undo and clearing without flattening artwork", () => {
+  const withPoint = addMotionPoint({}, { x: 0.25, y: 0.75 });
+  assert.deepEqual(withPoint.motionPath, [{ x: 0.25, y: 0.75 }]);
+  const withStroke = addAnnotationStroke(withPoint, {
+    type: "pen", color: "#91c8ff", width: 3, points: [{ x: 0.1, y: 0.2 }]
+  });
+  assert.equal(undoFrameEdit(withStroke).strokes.length, 0);
+  assert.equal(clearFrameEdit(withStroke).motionPath.length, 0);
+  assert.equal(withStroke.motionPath.length, 1);
 });
