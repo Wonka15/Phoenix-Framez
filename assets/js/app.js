@@ -127,6 +127,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     referenceImage.hidden = !edit.reference;
     if (edit.reference && referenceImage.src !== edit.reference) referenceImage.src = edit.reference;
     referenceImage.style.opacity = String(edit.referenceOpacity);
+    $("#referenceOpacity").value = String(Math.round(edit.referenceOpacity * 100));
     $("#toolsFrameLabel").textContent = "FRAME " + String(state.frame).padStart(3, "0");
     $("#annotationStatus").textContent = "Drawing layer · Frame " + String(state.frame).padStart(3, "0");
     $("#differenceModeToggle").disabled = !previous?.src;
@@ -150,6 +151,7 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
     $("#pageName").textContent = labels[name] || name[0].toUpperCase() + name.slice(1);
     $("#sidebar").classList.remove("open");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    if (name === "animation-tools") window.requestAnimationFrame(() => animationTools.render(getCurrentFrameEdit()));
   }
 
   function openProjectDialog() {
