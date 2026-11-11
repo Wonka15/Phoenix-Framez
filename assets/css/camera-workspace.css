@@ -73,3 +73,56 @@
 /* When reviewing an already captured exposure with the camera off, keep the still unobstructed. */
 #cameraView .camera-viewfinder.show-animation-frame .viewfinder-center{display:none}
 #cameraView #animationPreviewFrame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
+
+/* Physical, tactile camera power rocker — designed for touch screens. */
+#cameraView .camera-power-switch{
+  appearance:none;-webkit-appearance:none;position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:9px;flex:0 0 150px;min-width:150px;min-height:100px;
+  padding:10px 12px 8px;border:1px solid rgba(255,224,196,.19);border-radius:18px;
+  color:#e9d8c8;background:linear-gradient(155deg,#39312c 0%,#211e1b 62%,#171615 100%);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.11),inset 0 -5px 9px rgba(0,0,0,.5),0 9px 17px rgba(0,0,0,.38),0 2px 0 #090909;
+  cursor:pointer;touch-action:manipulation;transition:transform .16s ease,box-shadow .2s ease,border-color .2s ease;
+}
+#cameraView .camera-power-switch:hover{border-color:rgba(255,194,145,.42);transform:translateY(-1px)}
+#cameraView .camera-power-switch:active{transform:translateY(2px);box-shadow:inset 0 3px 8px rgba(0,0,0,.55),0 2px 5px rgba(0,0,0,.35)}
+#cameraView .camera-power-switch:focus-visible{outline:3px solid #ffc18d;outline-offset:4px}
+#cameraView .power-switch-labels{width:112px;display:flex;justify-content:space-between;padding:0 9px;color:#91857c;font-size:9px;font-weight:800;letter-spacing:1.5px}
+#cameraView .power-on-label{color:#a4a09a;transition:color .2s ease,text-shadow .2s ease}
+#cameraView .power-switch-track{
+  position:relative;display:block;width:116px;height:43px;padding:4px;border-radius:25px;
+  background:linear-gradient(180deg,#100f0e,#29231f 65%,#37302a);
+  border:1px solid rgba(0,0,0,.85);
+  box-shadow:inset 0 4px 8px rgba(0,0,0,.8),inset 0 1px 2px rgba(255,255,255,.09),0 1px 0 rgba(255,255,255,.1);
+}
+#cameraView .power-switch-knob{
+  position:absolute;left:4px;top:3px;width:48px;height:35px;border-radius:20px;
+  display:grid;place-items:center;color:#c2b8ae;
+  background:linear-gradient(155deg,#77716a 0%,#4b4540 43%,#282522 100%);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.45),0 4px 6px rgba(0,0,0,.62),0 1px 0 rgba(255,255,255,.12);
+  transition:left .24s cubic-bezier(.2,.85,.25,1.2),background .2s ease,box-shadow .2s ease;
+}
+#cameraView .power-symbol{font-size:20px;line-height:1;text-shadow:0 1px 2px #000}
+#cameraView .power-switch-caption{font-size:8px;font-weight:800;letter-spacing:2px;color:#a89a8d}
+#cameraView .camera-power-switch.is-on{
+  border-color:rgba(246,151,91,.56);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.12),inset 0 -5px 9px rgba(0,0,0,.5),0 0 0 1px rgba(235,126,70,.12),0 9px 20px rgba(0,0,0,.42),0 0 24px rgba(230,104,52,.13);
+}
+#cameraView .camera-power-switch.is-on .power-switch-knob{
+  left:62px;color:#fff3e8;
+  background:linear-gradient(155deg,#ffd29d 0%,#f29a5e 45%,#c95732 100%);
+  border-color:rgba(255,235,211,.65);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.55),inset 0 -3px 4px rgba(123,48,21,.38),0 4px 8px rgba(0,0,0,.58),0 0 14px rgba(255,137,76,.5);
+}
+#cameraView .camera-power-switch.is-on .power-symbol{text-shadow:0 1px 2px rgba(91,34,12,.6)}
+#cameraView .camera-power-switch.is-on .power-on-label{color:#ffc18d;text-shadow:0 0 9px rgba(255,141,81,.65)}
+#cameraView .camera-power-switch.is-pending .power-switch-knob{animation:cameraSwitchPulse .8s ease-in-out infinite alternate}
+#cameraView .camera-power-switch:disabled{opacity:.8;cursor:wait}
+@keyframes cameraSwitchPulse{from{filter:brightness(.9)}to{filter:brightness(1.35)}}
+@media(max-width:600px){
+  #cameraView .camera-power-switch{flex-basis:136px;min-width:136px;min-height:94px}
+}
+@media(prefers-reduced-motion:reduce){
+  #cameraView .camera-power-switch,#cameraView .power-switch-knob{transition:none}
+  #cameraView .camera-power-switch.is-pending .power-switch-knob{animation:none}
+}
