@@ -85,7 +85,7 @@
 }
 #cameraView .camera-power-switch:hover{border-color:rgba(255,194,145,.42);transform:translateY(-1px)}
 #cameraView .camera-power-switch:active{transform:translateY(2px);box-shadow:inset 0 3px 8px rgba(0,0,0,.55),0 2px 5px rgba(0,0,0,.35)}
-#cameraView .camera-power-switch{touch-action:none;user-select:none;-webkit-user-select:none}
+#cameraView .camera-power-switch{touch-action:pan-y;user-select:none;-webkit-user-select:none}
 #cameraView .camera-power-switch.is-dragging{cursor:grabbing}
 #cameraView .camera-power-switch.is-dragging .power-switch-knob{transition:none}
 #cameraView .camera-power-switch:focus-visible{outline:3px solid #ffc18d;outline-offset:4px}
