@@ -1042,10 +1042,11 @@ import { createAnimationTools, normalizeFrameEdits } from "./animation/animation
   // Restore the durable frame library after the first paint. Older localStorage
   // frames are migrated into IndexedDB once, without blocking the studio UI.
   frameStore.load().then(async savedFrames => {
-    state.frames = savedFrames.length ? savedFrames : (Array.isArray(legacyStoredFrames) ? legacyStoredFrames : []);
+    if (!state.frames.length) state.frames = savedFrames.length ? savedFrames : (Array.isArray(legacyStoredFrames) ? legacyStoredFrames : []);
     frameSequence.replace(state.frames);
     frameStoreReady = true;
     if (!savedFrames.length && state.frames.length) await frameStore.saveAll(state.frames);
+    else if (savedFrames.length && state.frames.length !== savedFrames.length) await frameStore.saveAll(state.frames);
     renderFrames();
     if (state.frames.length) setFrame(Math.min(state.frames.length, Math.max(1, state.frame)));
   }).catch(error => {
