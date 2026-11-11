@@ -75,7 +75,8 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     playTimer: null,
     projectLayout: "grid",
     cameraStream: null,
-    activeProjectId: null
+    activeProjectId: null,
+    selectedFrameIndex: -1
   };
 
   const dialog = $("#projectDialog");
@@ -366,10 +367,17 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
   }
 
   function renderFrames() {
+    frameSequence.replace(state.frames);
     $("#frameCount").textContent = state.frames.length + " FRAMES";
     $("#frameLibrary").innerHTML = state.frames.length
-      ? state.frames.map((frame, index) => `<img class="frame-thumb" src="${frame.src}" alt="Captured frame ${index + 1}" loading="lazy">`).join("")
+      ? state.frames.map((frame, index) => '<button type="button" class="frame-select' + (index === state.selectedFrameIndex ? ' selected' : '') + '" data-frame-index="' + index + '" aria-label="Select frame ' + (index + 1) + '">' +
+        (frame.blank ? '<span class="frame-thumb blank-frame">BLANK</span>' : '<img class="frame-thumb" src="' + frame.src + '" alt="" loading="lazy">') + '</button>').join("")
       : '<div class="frame-empty">Your captured frames will appear here.</div>';
+    $("[data-frame-index]").forEach(button => button.addEventListener("click", () => {
+      state.selectedFrameIndex = Number(button.dataset.frameIndex);
+      renderFrames();
+    }));
+    onionSkin.setSource(state.frames.find(frame => frame.src)?.src || "");
     storage.write(STORAGE_KEYS.frames, state.frames);
   }
 
@@ -496,6 +504,47 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
   });
   $("#playTimeline").addEventListener("click", togglePlayback);
 
+  $("#copyFrameBtn").addEventListener("click", () => {
+    if (!frameSequence.copy(state.selectedFrameIndex)) return notify("Select a frame to copy first.");
+    notify("Frame copied.");
+  });
+  $("#pasteFrameBtn").addEventListener("click", () => {
+    if (!frameSequence.paste(state.selectedFrameIndex + 1)) return notify("Copy a frame before pasting.");
+    state.frames = frameSequence.frames; state.selectedFrameIndex += 1; renderFrames(); notify("Frame pasted.");
+  });
+  $("#insertBlankFrameBtn").addEventListener("click", () => {
+    frameSequence.insertBlank(state.selectedFrameIndex < 0 ? state.frames.length : state.selectedFrameIndex + 1);
+    state.frames = frameSequence.frames; state.selectedFrameIndex = Math.max(0, state.selectedFrameIndex + 1); renderFrames(); notify("Blank frame inserted.");
+  });
+  $("#deleteFrameBtn").addEventListener("click", () => {
+    if (!frameSequence.remove(state.selectedFrameIndex)) return notify("Select a frame to delete first.");
+    state.frames = frameSequence.frames; state.selectedFrameIndex = -1; renderFrames(); notify("Frame deleted.");
+  });
+  $("#audioImportBtn").addEventListener("click", () => $("#audioFileInput").click());
+  $("#audioFileInput").addEventListener("change", event => {
+    const file = event.target.files[0]; if (!file) return;
+    try { const info = audioEngine.load(file); $("#audioFileName").textContent = info.name; $("#audioPreview").hidden = false; notify("Audio ready for local preview."); }
+    catch (error) { notify(error.message); }
+    event.target.value = "";
+  });
+  $("#audioClearBtn").addEventListener("click", () => {
+    audioEngine.clear(); $("#audioPreview").hidden = true; $("#audioFileName").textContent = "No audio loaded";
+  });
+  $("#importProjectBtn").addEventListener("click", () => $("#projectArchiveInput").click());
+  $("#projectArchiveInput").addEventListener("change", async event => {
+    const file = event.target.files[0]; if (!file) return;
+    try {
+      const archive = validateProjectArchive(JSON.parse(await file.text()));
+      if (!window.confirm("Import this archive and replace the current PhoenixFrame browser workspace?")) return;
+      state.projects = archive.projects; state.cues = archive.cues; state.frames = archive.frames;
+      const timeline = normalizeTimeline(archive.timeline);
+      state.markers = timeline.markers; state.tracks = timeline.tracks;
+      storage.write(STORAGE_KEYS.projects, state.projects); storage.write(STORAGE_KEYS.cues, state.cues);
+      storage.write(STORAGE_KEYS.frames, state.frames); persistTimeline();
+      renderProjects(); renderCues(); renderTimeline(); renderFrames(); notify("Project archive imported.");
+    } catch (error) { console.warn("[PhoenixFrame] Archive import failed:", error); notify(error.message || "Could not import this project archive."); }
+    finally { event.target.value = ""; }
+  });
   $("#cameraConnectBtn").addEventListener("click", () => state.cameraStream ? disconnectCamera() : connectCamera());
   $("#shutterBtn").addEventListener("click", captureFrame);
   $("#cameraImportBtn").addEventListener("click", () => $("#cameraFileInput").click());
