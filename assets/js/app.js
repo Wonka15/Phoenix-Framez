@@ -61,7 +61,11 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2600);
   }
 
-  const onionSkin = createOnionSkin($("#cameraViewfinder"));\n  const frameSequence = createFrameSequence(state.frames);\n  const audioEngine = createAudioEngine($("#audioPreview"));\n\n  function persistTimeline() {
+  const onionSkin = createOnionSkin($("#cameraViewfinder"));
+  const frameSequence = createFrameSequence(state.frames);
+  const audioEngine = createAudioEngine($("#audioPreview"));
+
+  function persistTimeline() {
     storage.write(STORAGE_KEYS.timeline, {
       markers: state.markers,
       tracks: state.tracks
@@ -237,11 +241,7 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
       row.addEventListener("dragleave", () => row.classList.remove("track-drop-target"));
       row.addEventListener("drop", event => {
         event.preventDefault();
-        const from = state.tracks.findIndex(track => track.id === draggedTrackId);
-        const to = state.tracks.findIndex(track => track.id === row.dataset.trackId);
-        if (from < 0 || to < 0 || from === to) return;
-        const [moved] = state.tracks.splice(from, 1);
-        state.tracks.splice(to, 0, moved);
+        if (!reorderTrack(state.tracks, draggedTrackId, row.dataset.trackId)) return;
         persistTimeline();
         renderTimeline();
       });
@@ -522,8 +522,10 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
     importFrames([...event.target.files]);
     event.target.value = "";
   });
-  $("#onionToggle").addEventListener("change", event => $("#cameraViewfinder").classList.toggle("onion-enabled", event.target.checked));
-  $("#onionOpacity").addEventListener("input", event => $("#cameraViewfinder").style.setProperty("--onion-opacity", Number(event.target.value) / 100));
+  $("#onionToggle").addEventListener("change", event => onionSkin.setEnabled(event.target.checked));
+  $("#onionOpacity").addEventListener("input", event => onionSkin.setOpacity(event.target.value));
+  onionSkin.setEnabled($("#onionToggle").checked);
+  onionSkin.setOpacity($("#onionOpacity").value);
 
   window.addEventListener("pagehide", () => {
     stopPlayback();
