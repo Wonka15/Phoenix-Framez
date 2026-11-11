@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131b">
+  <meta name="description" content="Eagle Companion — a creative studio companion for animation, timing, and production workflows.">
+  <title>Eagle Companion 1.0</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Eagle Companion home">
+        <span class="brand-mark">🦅</span>
+        <span><strong>EAGLE</strong><small>COMPANION 1.0</small></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="overview"><span>▦</span> Overview</button>
+        <button class="nav-item" data-view="timeline"><span>◷</span> Timeline</button>
+        <button class="nav-item" data-view="lipsync"><span>◖</span> Lip Sync</button>
+        <button class="nav-item" data-view="integrations"><span>⌘</span> Integrations</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="connection-card">
+          <span class="status-dot"></span>
+          <div><strong>Local workspace</strong><small>Ready for your project</small></div>
+        </div>
+        <a class="github-link" href="https://github.com/Wonka15/Eagle-Companion-" target="_blank" rel="noreferrer">↗ View on GitHub</a>
+        <span class="version">EAGLE COMPANION · ALPHA 0.1</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuToggle" aria-label="Toggle navigation">☰</button>
+        <div class="breadcrumb">Studio <span>/</span> <strong id="pageName">Overview</strong></div>
+        <div class="topbar-right"><span class="top-status"><i></i> Browser session active</span><div class="avatar">E</div></div>
+      </header>
+
+      <section class="view active-view" id="overviewView">
+        <div class="welcome-row">
+          <div><div class="eyebrow">YOUR CREATIVE WORKSPACE</div><h1>Good to see you.</h1><p class="muted">A home base for animation planning, timing, and production.</p></div>
+          <button class="primary-btn" id="newProjectBtn">＋ New project</button>
+        </div>
+        <div class="hero-card">
+          <div class="hero-copy"><span class="pill">STUDIO COMPANION</span><h2>Bring every frame<br>into focus.</h2><p>Plan shots, shape timing, and keep your creative tools connected in one place.</p><button class="hero-btn" data-go="timeline">Open timeline <span>→</span></button></div>
+          <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="eagle-symbol">🦅</div><div class="spark spark-one">✦</div><div class="spark spark-two">✧</div></div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">AT A GLANCE</div><h2>Studio overview</h2></div><span class="muted tiny">Your browser workspace</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon purple">▣</span><span class="stat-label">Projects</span><strong id="projectCount">0</strong><small>Created in this browser</small></article>
+          <article class="stat-card"><span class="stat-icon blue">◷</span><span class="stat-label">Timeline</span><strong>24 FPS</strong><small>Default playback rate</small></article>
+          <article class="stat-card"><span class="stat-icon amber">◖</span><span class="stat-label">Lip-sync cues</span><strong id="cueCount">0</strong><small>Across this session</small></article>
+          <article class="stat-card"><span class="stat-icon green">⌘</span><span class="stat-label">Integrations</span><strong>2</strong><small>Blender + Godot planned</small></article>
+        </div>
+        <div class="lower-grid">
+          <section class="panel project-panel"><div class="panel-heading"><div><h3>Recent projects</h3><p class="muted">Pick up where you left off.</p></div><button class="text-btn" id="addProjectLink">＋ Add</button></div><div id="projectList" class="empty-state"><div class="empty-icon">▱</div><strong>No projects yet</strong><p>Create a project to start organizing your scenes and animation work.</p><button class="secondary-btn" id="emptyCreateBtn">Create your first project</button></div></section>
+          <section class="panel activity-panel"><div class="panel-heading"><div><h3>Getting started</h3><p class="muted">A few steps to set up your studio.</p></div></div><div class="check-list"><div><span class="check-number">01</span><p><strong>Create a project</strong><small>Give your production a home.</small></p><span class="step-state">START HERE</span></div><div><span class="check-number">02</span><p><strong>Set your frame rate</strong><small>Choose a timing standard.</small></p><span class="step-state">NEXT</span></div><div><span class="check-number">03</span><p><strong>Explore integrations</strong><small>Connect your creative workflow.</small></p><span class="step-state">LATER</span></div></div></section>
+        </div>
+      </section>
+
+      <section class="view" id="timelineView">
+        <div class="page-intro"><div class="eyebrow">ANIMATION WORKSPACE</div><h1>Timeline</h1><p class="muted">A lightweight timing board for blocking ideas and planning shots.</p></div>
+        <div class="panel timeline-panel"><div class="timeline-toolbar"><div><strong id="timelineProjectName">Untitled sequence</strong><small class="muted">24 frames per second</small></div><div class="toolbar-actions"><button class="secondary-btn" id="addTrackBtn">＋ Add track</button><button class="primary-btn" id="addMarkerBtn">＋ Add marker</button></div></div><div class="timeline-ruler"><span>TRACK</span><div class="ruler-numbers"><span>0</span><span>24</span><span>48</span><span>72</span><span>96</span><span>120</span></div></div><div id="tracks" class="tracks"><div class="track-row"><div class="track-name">Camera</div><div class="track-lane"><span class="clip clip-purple" style="left:2%;width:30%">Opening shot</span></div></div><div class="track-row"><div class="track-name">Animation</div><div class="track-lane"><span class="clip clip-blue" style="left:18%;width:38%">Character blocking</span></div></div><div class="track-row"><div class="track-name">Audio</div><div class="track-lane"><span class="clip clip-amber" style="left:3%;width:65%">Scratch audio</span></div></div></div><div class="timeline-footer"><span class="muted tiny" id="markerLabel">No markers yet</span><span class="muted tiny">Prototype timeline · edits stay in this browser</span></div></div>
+        <div class="notice"><strong>Coming next:</strong> frame scrubbing, draggable clips, playback preview, and project-file exchange with Eagle Animation.</div>
+      </section>
+
+      <section class="view" id="lipsyncView">
+        <div class="page-intro"><div class="eyebrow">DIALOGUE & PERFORMANCE</div><h1>Lip Sync</h1><p class="muted">Build a simple mouth-cue sheet alongside your dialogue.</p></div>
+        <div class="panel lipsync-panel"><div class="panel-heading"><div><h3>Mouth cue sheet</h3><p class="muted">Add phoneme or expression cues at specific frames.</p></div><button class="primary-btn" id="addCueBtn">＋ Add cue</button></div><div class="cue-form"><label>Frame<input id="cueFrame" type="number" min="0" value="1"></label><label>Mouth shape<select id="cueShape"><option value="Rest">Rest</option><option value="A / I">A / I</option><option value="E">E</option><option value="O">O</option><option value="U">U</option><option value="FV">F / V</option><option value="MBP">M / B / P</option><option value="L">L</option></select></label><label>Note<input id="cueNote" type="text" placeholder="Optional dialogue note"></label></div><div id="cueList" class="cue-list"><div class="empty-state compact"><div class="empty-icon">◖</div><strong>No cues yet</strong><p>Add a cue to begin your mouth-shape sequence.</p></div></div><p class="footnote">Cue data is currently stored locally in this browser. Audio waveform analysis and Eagle project export are planned features.</p></div>
+      </section>
+
+      <section class="view" id="integrationsView">
+        <div class="page-intro"><div class="eyebrow">CONNECT YOUR TOOLKIT</div><h1>Integrations</h1><p class="muted">A roadmap for connecting Eagle Companion with your creative applications.</p></div>
+        <div class="integration-grid">
+          <article class="integration-card"><div class="integration-logo blender-logo">B</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Blender</h3><p>Exchange scene timing, frame ranges, and animation markers with Blender.</p><button class="secondary-btn" disabled>Integration in development</button></div></article>
+          <article class="integration-card"><div class="integration-logo godot-logo">G</div><div class="integration-meta"><span class="pill planned">PLANNED</span><h3>Godot</h3><p>Coordinate animation timelines and scene workflow with Godot projects.</p><button class="secondary-btn" disabled>Integration in development</button></div></article>
+          <article class="integration-card"><div class="integration-logo eagle-logo">🦅</div><div class="integration-meta"><span class="pill prototype">CORE PROJECT</span><h3>Eagle Animation</h3><p>Companion tools are being designed to support the Eagle Animation project.</p><a class="secondary-btn link-button" href="https://github.com/Wonka15/eagle-animation" target="_blank" rel="noreferrer">View project ↗</a></div></article>
+        </div>
+        <div class="notice"><strong>Honest status:</strong> these are roadmap entries, not active connections. No integration is claimed as working until it has been implemented and tested.</div>
+      </section>
+      <footer class="app-footer"><span>🦅 EAGLE COMPANION 1.0</span><span>Made for the creative process.</span></footer>
+    </main>
+  </div>
+
+  <dialog id="projectDialog" class="project-dialog"><form method="dialog" id="projectForm"><div class="dialog-top"><div><div class="eyebrow">NEW WORKSPACE</div><h2>Create a project</h2></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div><label>Project name<input id="projectNameInput" required maxlength="60" placeholder="e.g. Forest short film"></label><label>Project type<select id="projectTypeInput"><option>Animation</option><option>Stop motion</option><option>Game cinematics</option><option>Character study</option><option>Other</option></select></label><div class="dialog-actions"><button class="secondary-btn" value="cancel">Cancel</button><button class="primary-btn" id="saveProjectBtn" value="default">Create project</button></div></form></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
