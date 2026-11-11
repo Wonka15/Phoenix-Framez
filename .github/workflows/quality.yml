@@ -1,0 +1,23 @@
+name: PhoenixFrame quality checks
+
+on:
+  push:
+    branches: [ndev, main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax and HTML structure
+        run: npm run check
