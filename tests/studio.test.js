@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeTimeline, createTrack, createMarker, moveClip, reorderTrack } from "../assets/js/timeline/timeline-model.js";
 import { createFrameSequence } from "../assets/js/animation/frame-sequence.js";
+import { normalizeFps, nextFrameIndex, previousFrameSource, frameLabel } from "../assets/js/animation/stop-motion.js";
 import { buildProjectArchive, validateProjectArchive } from "../assets/js/export/project-archive.js";
 
 test("timeline normalizes invalid frame positions and missing track data", () => {
@@ -36,4 +37,19 @@ test("project archive validates v1 data and rejects unknown formats", () => {
   const archive = buildProjectArchive({ projects: [], cues: [], frames: [], markers: [], tracks: [] });
   assert.equal(validateProjectArchive(archive).version, 1);
   assert.throws(() => validateProjectArchive({ format: "other", version: 1 }), /not a supported/);
+});
+
+test("stop-motion transport respects supported frame rates and sequence boundaries", () => {
+  assert.equal(normalizeFps("25 FPS"), 25);
+  assert.equal(normalizeFps(999), 24);
+  assert.equal(nextFrameIndex(4, 5, false), 5);
+  assert.equal(nextFrameIndex(5, 5, false), null);
+  assert.equal(nextFrameIndex(5, 5, true), 1);
+  assert.equal(frameLabel(7), "Frame 007");
+});
+
+test("onion skin uses the previous captured exposure, never the selected one", () => {
+  const frames = [{src:"one"}, {src:"two"}, {src:"three"}];
+  assert.equal(previousFrameSource(frames, 2), "two");
+  assert.equal(previousFrameSource(frames, 0), "");
 });
