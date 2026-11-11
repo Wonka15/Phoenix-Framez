@@ -386,23 +386,9 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
 
   // ---------- Portable project snapshot ----------
   function exportProject() {
-    const payload = {
-      format: "phoenixframe-project",
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      projects: state.projects,
-      cues: state.cues,
-      timeline: { markers: state.markers, tracks: state.tracks },
-      frames: state.frames
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "phoenixframe-project.json";
-    link.click();
-    URL.revokeObjectURL(url);
-    notify("Project manifest exported.");
+    const payload = buildProjectArchive(state);
+    downloadJson(payload, "phoenixframe-project.json");
+    notify("Project archive exported.");
   }
 
   // ---------- Event wiring ----------
@@ -433,13 +419,7 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
       console.warn("[PhoenixFrame] Project thumbnail could not be processed:", error);
       notify("The project will be created without a cover thumbnail.");
     }
-    state.projects.unshift({
-      id: makeId("project"),
-      name,
-      type: $("#projectTypeInput").value,
-      date: new Date().toLocaleDateString(),
-      cover
-    });
+    state.projects.unshift(createProject({ name, type: $("#projectTypeInput").value, cover }));
     storage.write(STORAGE_KEYS.projects, state.projects);
     renderProjects();
     dialog.close();
@@ -532,6 +512,7 @@ import { buildProjectArchive, validateProjectArchive, downloadJson } from "./exp
   window.addEventListener("pagehide", () => {
     stopPlayback();
     state.cameraStream?.getTracks().forEach(track => track.stop());
+    audioEngine.dispose();
   });
 
   // ---------- Initial render ----------
