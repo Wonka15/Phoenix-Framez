@@ -2,7 +2,7 @@ name: Deploy Eagle Companion to GitHub Pages
 
 on:
   push:
-    branches: [main, ndev]
+    branches: [ndev]
   workflow_dispatch:
 
 permissions:
