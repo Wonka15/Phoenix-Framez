@@ -7,6 +7,7 @@ export function createOnionSkin(viewfinder) {
     image.className = "onion-skin-image";
     image.alt = "Previous animation frame overlay";
     image.setAttribute("aria-hidden", "true");
+    image.hidden = true;
     viewfinder.append(image);
   }
   return {
